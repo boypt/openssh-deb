@@ -17,4 +17,17 @@ sudo apt install pkgconf build-essential fakeroot dpkg-dev debhelper debhelper-c
 ./compile.sh
 ```
 
+## Use Docker to Build
 
+Use docker to build the DEBs without installing a bunch of developing package in your host system.
+
+```bash
+docker build \
+    -t opensshbuild \
+    --build-arg DISTRO=ubuntu \
+    --build-arg DISTVER=22.04 \
+    --build-arg APT_MIRROR=mirrors.bfsu.edu.cn \
+    ./docker
+docker run --rm -v .:/data opensshbuild
+docker image rm opensshbuild
+```
