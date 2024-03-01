@@ -6,14 +6,15 @@ Similar Project:　[Latest OpenSSH RPM for CentOS](https://github.com/boypt/open
 
 ## Direct Build
 
-### Install Dependencies
-
 ```bash
-sudo apt install pkgconf build-essential fakeroot dpkg-dev debhelper debhelper-compat dh-exec dh-runit libaudit-dev libedit-dev libfido2-dev libgtk-3-dev libselinux1-dev libsystemd-dev
-```
 
-### Build
-```bash
+# Install Dependencies
+sudo apt install pkgconf build-essential fakeroot \
+    dpkg-dev debhelper debhelper-compat dh-exec dh-runit \
+    libkrb5-dev libpam0g-dev libwrap0-dev \
+    libaudit-dev libedit-dev libfido2-dev \
+    libgtk-3-dev libselinux1-dev libsystemd-dev
+
 # pull source from debian sid
 ./pullsrc.sh
 
@@ -23,7 +24,7 @@ sudo apt install pkgconf build-essential fakeroot dpkg-dev debhelper debhelper-c
 
 ## Use Docker to Build
 
-Build DEBs without installing a bunch of dev packages in your system.
+Build without installing a bunch of dev packages in your system.
 
 ```bash
 ./pullsrc.sh
