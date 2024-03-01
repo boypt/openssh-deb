@@ -26,7 +26,7 @@ docker build \
     -t opensshbuild \
     --build-arg DISTRO=ubuntu \
     --build-arg DISTVER=22.04 \
-    --build-arg APT_MIRROR=mirrors.bfsu.edu.cn \
+    --build-arg APT_MIRROR=ftp.us.debian.org \
     ./docker
 docker run --rm -v .:/data opensshbuild
 docker image rm opensshbuild
