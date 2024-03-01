@@ -3,6 +3,7 @@ ARG DISTVER=22.04
 FROM $DISTRO:$DISTVER
 WORKDIR /data
 ARG APT_MIRROR=
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN if [ ! -z "$APT_MIRROR" ]; then \
       sed -i "s|$(awk '/^deb/{print $2}' /etc/apt/sources.list | head -n1 | cut -d/ -f3)|${APT_MIRROR}|" /etc/apt/sources.list \
