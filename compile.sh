@@ -39,6 +39,7 @@ sudo apt install -y $__dir/builddep/*.deb
 
 
 cd $__dir
+[[ -d build ]] && rm -rf build
 mkdir -p build && pushd build
 dpkg-source -x $__dir/downloads/openssh_${OPENSSHVER}-${OPENSSHPKGVER}.dsc
 
