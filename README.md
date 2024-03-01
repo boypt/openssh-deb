@@ -48,4 +48,5 @@ ls -l build/*.deb
 # Ignore thoses files with dbgsym and tests
 # Normally all you need is these 3 debs.
 # openssh-client openssh-server openssh-sftp-server
+find build -maxdepth 1 ! -name '*dbgsym*' ! -name '*tests*' -name '*.deb'
 ```
