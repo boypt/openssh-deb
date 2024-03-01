@@ -32,3 +32,15 @@ docker build \
 docker run --rm -v $PWD:/data opensshbuild
 docker image rm opensshbuild
 ```
+
+## Install DEBs
+
+All DEBs are generated right under `build` directory. (Either direct build or with docker).
+
+```bash
+ls -l build/*.deb
+
+# Ignore thoses files with dbgsym and tests
+# Normally all you need is these 3 debs.
+# openssh-client openssh-server openssh-sftp-server
+```
