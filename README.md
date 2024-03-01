@@ -1,25 +1,29 @@
 # Latest OpenSSH for Debian / Ubuntu release.
 
-
 A simple script to build latest deb package, using Debian sid packaging sources.
 
+Similar Project:　[Latest OpenSSH RPM for CentOS](https://github.com/boypt/openssh-rpms)
 
-## Install Dependencies
+## Direct Build
+
+### Install Dependencies
 
 ```bash
 sudo apt install pkgconf build-essential fakeroot dpkg-dev debhelper debhelper-compat dh-exec dh-runit libaudit-dev libedit-dev libfido2-dev libgtk-3-dev libselinux1-dev libsystemd-dev
 ```
 
-## Build
-
+### Build
 ```bash
+# pull source from debian sid
 ./pullsrc.sh
+
+# direct build
 ./compile.sh
 ```
 
 ## Use Docker to Build
 
-Build the DEBs without installing a bunch of developing package in your host system.
+Build DEBs without installing a bunch of dev packages in your system.
 
 ```bash
 ./pullsrc.sh
