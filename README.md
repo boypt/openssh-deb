@@ -1,4 +1,4 @@
-# Latest OpenSSH for Debian / Ubuntu release.
+# Latest OpenSSH for Debian / Ubuntu distros.
 
 A simple script to build latest deb package, using Debian sid packaging sources.
 
