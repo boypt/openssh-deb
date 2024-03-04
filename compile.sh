@@ -23,6 +23,7 @@ SOURCES=(
 	openssh_${OPENSSHVER}-${OPENSSHPKGVER}.dsc \
 	openssh_${OPENSSHVER}.orig.tar.gz \
 	openssh_${OPENSSHVER}.orig.tar.gz.asc \
+	$OPENSSLSRC \
 )
 
 CHECKEXISTS() {
@@ -41,12 +42,31 @@ sudo apt install -y $__dir/builddep/*.deb
 cd $__dir
 [[ -d build ]] && rm -rf build
 mkdir -p build && pushd build
+
+#### Build OPENSSL
+mkdir -p openssl
+tar xfz $__dir/downloads/$OPENSSLSRC --strip-components=1 -C openssl
+pushd openssl
+./config shared zlib -fPIC
+make -j$(nproc)
+popd
+#################
+
+
 dpkg-source -x $__dir/downloads/openssh_${OPENSSHVER}-${OPENSSHPKGVER}.dsc
 
+pushd openssh-${OPENSSHVER}
+# Hack to use the our openssl
+###
+sed -i 's|libfido2-dev (>= 1.5.0)|libfido2-dev (>= 1.3.0)|' debian/control
+sed -i '/libssl-dev/d' debian/control
+sed -i "/with-ssl-engine/aconfflags += --with-ssl-dir=$__dir/build/openssl" debian/rules
+sed -i '/override_dh_auto_build-arch:/a\'$'\tsed -i '"'s|-lcrypto|$__dir/build/openssl/libcrypto.a -lpthread|g' debian/build-deb/Makefile" debian/rules
 
-cd openssh-${OPENSSHVER}
+### Build OpenSSH Package
 env \
+	LD_LIBRARY_PATH=$__dir/build/openssl \
 	DEB_BUILD_OPTIONS=nocheck \
 	DEB_BUILD_PROFILES=pkg.openssh.nognome \
 	dpkg-buildpackage --no-sign -rfakeroot -b
-
+popd
