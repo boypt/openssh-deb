@@ -45,5 +45,8 @@ dpkg-source -x $__dir/downloads/openssh_${OPENSSHVER}-${OPENSSHPKGVER}.dsc
 
 
 cd openssh-${OPENSSHVER}
-dpkg-buildpackage --no-sign -rfakeroot -b
+env \
+	DEB_BUILD_OPTIONS=nocheck \
+	DEB_BUILD_PROFILES=pkg.openssh.nognome \
+	dpkg-buildpackage --no-sign -rfakeroot -b
 
