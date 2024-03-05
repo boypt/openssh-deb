@@ -30,7 +30,7 @@ sudo apt install pkgconf build-essential fakeroot \
 
 ## Use Docker to Build
 
-Build without installing a bunch of dev packages in your system.
+With docker, build without installing a bunch of dev packages, also for different distro versions by changing build-arg.
 
 ```bash
 ./pullsrc.sh
