@@ -33,15 +33,23 @@ sudo apt install pkgconf build-essential fakeroot \
 With docker, build without installing a bunch of dev packages, also for different distro versions by changing build-arg.
 
 ```bash
+# pull source from debian sid
 ./pullsrc.sh
+
+# build a docker image that fits your target system.
 docker build \
     -t opensshbuild \
     --build-arg DISTRO=ubuntu \
     --build-arg DISTVER=22.04 \
     --build-arg APT_MIRROR=ftp.us.debian.org \
     ./docker
+
+# run the build process
 docker run --rm -v $PWD:/data opensshbuild
+
+# clean up docker image
 docker image rm opensshbuild
+
 ```
 
 ## Install DEBs
