@@ -4,6 +4,11 @@ A simple script to build latest deb package, using Debian sid packaging sources.
 
 Similar Project:　[Latest OpenSSH RPM for CentOS](https://github.com/boypt/openssh-rpms)
 
+### Current Version:
+
+- OpenSSH 9.6p1
+- OpenSSL 3.0.13 (static linked)
+
 ### Supported (tested) Distro:
 
 - Ubuntu 22.04
@@ -13,7 +18,6 @@ Similar Project:　[Latest OpenSSH RPM for CentOS](https://github.com/boypt/open
 ## Direct Build
 
 ```bash
-
 # Install Dependencies
 sudo apt install pkgconf build-essential fakeroot \
     dpkg-dev debhelper debhelper-compat dh-exec dh-runit \
