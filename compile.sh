@@ -58,14 +58,17 @@ dpkg-source -x $__dir/downloads/openssh_${OPENSSHVER}-${OPENSSHPKGVER}.dsc
 pushd openssh-${OPENSSHVER}
 # Hack to use the our openssl
 ###
-sed -i 's|libfido2-dev (>= 1.5.0)|libfido2-dev (>= 1.3.0)|' debian/control
+if dpkg --compare-versions $(dpkg-query -f '${Version}' -W libfido2-dev) lt '1.5.0'; then
+	sed -i '/libfido2-dev/d' debian/control
+	sed -i "s|with-security-key-builtin|disable-security-key|" debian/rules
+fi
+sed -i "s|-lcrypto|$__dir/build/openssl/libcrypto.a -lz -ldl -pthread|g" configure configure.ac
 sed -i '/libssl-dev/d' debian/control
-sed -i "/with-ssl-engine/aconfflags += --with-ssl-dir=$__dir/build/openssl" debian/rules
-sed -i '/override_dh_auto_build-arch:/a\'$'\tsed -i '"'s|-lcrypto|$__dir/build/openssl/libcrypto.a -lpthread|g' debian/build-deb/Makefile" debian/rules
+sed -i "/^confflags += --with-ssl-engine/aconfflags += --with-ssl-dir=$__dir/build/openssl\nconfflags_udeb += --with-ssl-dir=$__dir/build/openssl" debian/rules
+sed -i "/^override_dh_auto_configure-arch:/iDEB_CONFIGURE_SCRIPT_ENV += LD_LIBRARY_PATH=$__dir/build/openssl" debian/rules
 
 ### Build OpenSSH Package
 env \
-	LD_LIBRARY_PATH=$__dir/build/openssl \
 	DEB_BUILD_OPTIONS=nocheck \
 	DEB_BUILD_PROFILES=pkg.openssh.nognome \
 	dpkg-buildpackage --no-sign -rfakeroot -b
