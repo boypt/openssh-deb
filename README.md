@@ -4,6 +4,12 @@ A simple script to build latest deb package, using Debian sid packaging sources.
 
 Similar Project:　[Latest OpenSSH RPM for CentOS](https://github.com/boypt/openssh-rpms)
 
+### Supported (tested) Distro:
+
+- Ubuntu 22.04
+- Ubuntu 20.04
+- Ubuntu 18.04
+
 ## Direct Build
 
 ```bash
