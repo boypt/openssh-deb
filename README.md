@@ -1,8 +1,8 @@
-# Latest OpenSSH for Debian / Ubuntu distros.
+# Backport OpenSSH for Debian / Ubuntu distros.
 
-A simple script to build latest deb package, using Debian sid packaging sources.
+A simple script to build backport openssh package, using Debian sid packaging sources.
 
-Similar Project:　[Latest OpenSSH RPM for CentOS](https://github.com/boypt/openssh-rpms)
+Similar Project:　[Backport OpenSSH RPM for CentOS](https://github.com/boypt/openssh-rpms)
 
 ### Current Version:
 
@@ -25,7 +25,7 @@ sudo apt install pkgconf build-essential fakeroot \
     libaudit-dev libedit-dev libfido2-dev \
     libgtk-3-dev libselinux1-dev libsystemd-dev
 
-# pull source from debian sid
+# pull source
 ./pullsrc.sh
 
 # direct build
@@ -34,7 +34,7 @@ sudo apt install pkgconf build-essential fakeroot \
 
 ## Use Docker to Build
 
-With docker, build without installing a bunch of dev packages, also for different distro versions by changing build-arg.
+Build without installing a bunch of dev packages, also for a different distro by changing build-arg.
 
 ```bash
 # pull source from debian sid
@@ -53,18 +53,16 @@ docker run --rm -v $PWD:/data opensshbuild
 
 # clean up docker image
 docker image rm opensshbuild
-
+docker builder prune
 ```
 
 ## Install DEBs
 
-All DEBs are generated right under `build` directory. (Either direct build or with docker).
+All DEBs are generated right under `build` directory. (either direct build or docker build).
 
 ```bash
 ls -l build/*.deb
 
 # Ignore thoses files with dbgsym and tests
-# Normally all you need is these 3 debs.
-# openssh-client openssh-server openssh-sftp-server
-find build -maxdepth 1 ! -name '*dbgsym*' ! -name '*tests*' -name '*.deb'
+find build -maxdepth 1 ! -name '*dbgsym*' ! -name '*tests*' -name '*.deb' | xargs sudo apt install -y
 ```
