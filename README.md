@@ -1,12 +1,12 @@
 # Backport OpenSSH for Debian / Ubuntu distros.
 
-A simple script to build backport openssh package, using Debian sid packaging sources.
+A simple script to build backport openssh deb, using [Debian sid sources](https://packages.debian.org/sid/openssh-server).
 
 Similar Project:　[Backport OpenSSH RPM for CentOS](https://github.com/boypt/openssh-rpms)
 
 ### Current Version:
 
-- OpenSSH 9.6p1
+- OpenSSH 9.7p1
 - OpenSSL 3.0.13 (static linked)
 
 ### Supported (tested) Distro:
