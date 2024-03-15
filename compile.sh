@@ -49,6 +49,7 @@ tar xfz $__dir/downloads/$OPENSSLSRC --strip-components=1 -C openssl
 pushd openssl
 ./config shared zlib -fPIC
 make -j$(nproc)
+OPENSSLDIR=$PWD
 popd
 #################
 
@@ -62,10 +63,10 @@ if dpkg --compare-versions $(dpkg-query -f '${Version}' -W libfido2-dev) lt '1.5
 	sed -i '/libfido2-dev/d' debian/control
 	sed -i "s|with-security-key-builtin|disable-security-key|" debian/rules
 fi
-sed -i "s|-lcrypto|$__dir/build/openssl/libcrypto.a -lz -ldl -pthread|g" configure configure.ac
+sed -i "s|-lcrypto|${OPENSSLDIR}/libcrypto.a -lz -ldl -pthread|g" configure configure.ac
 sed -i '/libssl-dev/d' debian/control
-sed -i "/^confflags += --with-ssl-engine/aconfflags += --with-ssl-dir=$__dir/build/openssl\nconfflags_udeb += --with-ssl-dir=$__dir/build/openssl" debian/rules
-sed -i "/^override_dh_auto_configure-arch:/iDEB_CONFIGURE_SCRIPT_ENV += LD_LIBRARY_PATH=$__dir/build/openssl" debian/rules
+sed -i "/^confflags += --with-ssl-engine/aconfflags += --with-ssl-dir=${OPENSSLDIR}\nconfflags_udeb += --with-ssl-dir=${OPENSSLDIR}" debian/rules
+sed -i "/^override_dh_auto_configure-arch:/iDEB_CONFIGURE_SCRIPT_ENV += LD_LIBRARY_PATH=${OPENSSLDIR}" debian/rules
 
 ### Build OpenSSH Package
 env \
