@@ -21,8 +21,8 @@ source $__dir/version.env
 mkdir -p $__dir/downloads
 cd $__dir/downloads
 wget --continue \
-    $DEBMIRROR/pool/main/o/openssh/openssh_${OPENSSHVER}-${OPENSSHPKGVER}.debian.tar.xz \
-    $DEBMIRROR/pool/main/o/openssh/openssh_${OPENSSHVER}-${OPENSSHPKGVER}.dsc \
+    $DEBMIRROR/pool/main/o/openssh/openssh_${OPENSSH_SIDPKG}.debian.tar.xz \
+    $DEBMIRROR/pool/main/o/openssh/openssh_${OPENSSH_SIDPKG}.dsc \
     $DEBMIRROR/pool/main/o/openssh/openssh_${OPENSSHVER}.orig.tar.gz \
     $DEBMIRROR/pool/main/o/openssh/openssh_${OPENSSHVER}.orig.tar.gz.asc \
     $OPENSSLMIR/$OPENSSLSRC

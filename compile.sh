@@ -19,8 +19,8 @@ arg1="${1:-}"
 
 source $__dir/version.env
 SOURCES=(
-	openssh_${OPENSSHVER}-${OPENSSHPKGVER}.debian.tar.xz \
-	openssh_${OPENSSHVER}-${OPENSSHPKGVER}.dsc \
+	openssh_${OPENSSH_SIDPKG}.debian.tar.xz \
+	openssh_${OPENSSH_SIDPKG}.dsc \
 	openssh_${OPENSSHVER}.orig.tar.gz \
 	openssh_${OPENSSHVER}.orig.tar.gz.asc \
 	$OPENSSLSRC \
@@ -53,7 +53,7 @@ popd
 #################
 
 
-dpkg-source -x $__dir/downloads/openssh_${OPENSSHVER}-${OPENSSHPKGVER}.dsc
+dpkg-source -x $__dir/downloads/openssh_${OPENSSH_SIDPKG}.dsc
 
 pushd openssh-${OPENSSHVER}
 # Hack to use the our openssl
