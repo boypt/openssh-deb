@@ -14,6 +14,8 @@ Similar Project:　[Backport OpenSSH RPM for CentOS](https://github.com/boypt/op
 - Ubuntu 22.04
 - Ubuntu 20.04
 - Ubuntu 18.04
+- Debian bookworm
+- Debian bullseye
 
 ## Direct Build
 
@@ -33,7 +35,7 @@ sudo apt install pkgconf build-essential fakeroot \
 ./compile.sh
 ```
 
-## Use Docker to Build
+## Docker Build
 
 Build without installing a bunch of dev packages, also for a different distro by changing build-arg.
 
