@@ -23,7 +23,8 @@ sudo apt install pkgconf build-essential fakeroot \
     dpkg-dev debhelper debhelper-compat dh-exec dh-runit \
     libkrb5-dev libpam0g-dev libwrap0-dev \
     libaudit-dev libedit-dev libfido2-dev \
-    libgtk-3-dev libselinux1-dev libsystemd-dev
+    libgtk-3-dev libselinux1-dev libsystemd-dev \
+    libcbor-dev
 
 # pull source
 ./pullsrc.sh
