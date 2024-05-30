@@ -13,6 +13,7 @@ __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 __file="${__dir}/$(basename "${BASH_SOURCE[0]}")"
 __base="$(basename ${__file} .sh)"
 __root="$(cd "$(dirname "${__dir}")" && pwd)" # <-- change this as it depends on your app
+__libfido2_ver="$(dpkg-query -f '${Version}' -W libfido2-dev || echo '0.0.0')"
 
 arg1="${1:-}"
 
@@ -36,7 +37,16 @@ CHECKEXISTS() {
 for fn in ${SOURCES[@]}; do
   CHECKEXISTS $fn 
 done
-sudo apt install -y $__dir/builddep/*.deb
+__ubuntu_ver=$(lsb_release -sc || "Not ubuntu system")
+case $__ubuntu_ver in
+    noble)
+        echo "For Ubuntu 24.04 LTS, nothing need to install."
+        ;;
+    *)
+        sudo apt install -y $__dir/builddep/*.deb
+        ;;
+esac
+
 
 
 cd $__dir
@@ -59,7 +69,7 @@ dpkg-source -x $__dir/downloads/openssh_${OPENSSH_SIDPKG}.dsc
 pushd openssh-${OPENSSHVER}
 # Hack to use the our openssl
 ###
-if dpkg --compare-versions $(dpkg-query -f '${Version}' -W libfido2-dev) lt '1.5.0'; then
+if dpkg --compare-versions $__libfido2_ver lt '1.5.0'; then
 	sed -i '/libfido2-dev/d' debian/control
 	sed -i "s|with-security-key-builtin|disable-security-key|" debian/rules
 fi
@@ -74,3 +84,9 @@ env \
 	DEB_BUILD_PROFILES=pkg.openssh.nognome \
 	dpkg-buildpackage --no-sign -rfakeroot -b
 popd
+
+# Move all files into output dir
+cd $__dir
+mkdir -p output
+mv -f build/*.deb output/ 2> /dev/null || echo "No deb packages created!"
+mv -f build/*.udeb output/ 2> /dev/null || echo "No udeb packages created!"

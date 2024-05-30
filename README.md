@@ -11,9 +11,10 @@ Similar Project:　[Backport OpenSSH RPM for CentOS](https://github.com/boypt/op
 
 ### Supported (tested) Distro:
 
+- Ubuntu 24.04
 - Ubuntu 22.04
 - Ubuntu 20.04
-- Ubuntu 18.04
+- Ubuntu 18.04 *(Not valid via docker, build error cause of `glibc`)*
 - Debian bookworm
 - Debian bullseye
 
@@ -49,10 +50,11 @@ docker build \
     --build-arg DISTRO=ubuntu \
     --build-arg DISTVER=22.04 \
     --build-arg APT_MIRROR=ftp.us.debian.org \
-    ./docker
+    -f ./docker/Dockerfile \
+    .
 
 # run the build process
-docker run --rm -v $PWD:/data opensshbuild
+docker run --rm -v $PWD:/data/output opensshbuild
 
 # clean up docker image
 docker image rm opensshbuild
