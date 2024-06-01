@@ -2,6 +2,8 @@ ARG DISTRO=ubuntu
 ARG DISTVER=22.04
 FROM $DISTRO:$DISTVER
 WORKDIR /data
+# Copy all files
+COPY . /data
 ARG APT_MIRROR=
 ENV DEBIAN_FRONTEND=noninteractive
 
