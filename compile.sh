@@ -14,6 +14,7 @@ __file="${__dir}/$(basename "${BASH_SOURCE[0]}")"
 __base="$(basename ${__file} .sh)"
 __root="$(cd "$(dirname "${__dir}")" && pwd)" # <-- change this as it depends on your app
 __libfido2_ver="$(dpkg-query -f '${Version}' -W libfido2-dev || echo '0.0.0')"
+__debhelper_ver="$(dpkg-query -f '${Version}' -W debhelper || echo '0.0.0')"
 
 arg1="${1:-}"
 
@@ -37,17 +38,9 @@ CHECKEXISTS() {
 for fn in ${SOURCES[@]}; do
   CHECKEXISTS $fn 
 done
-__ubuntu_ver=$(lsb_release -sc || "Not ubuntu system")
-case $__ubuntu_ver in
-    noble)
-        echo "For Ubuntu 24.04 LTS, nothing need to install."
-        ;;
-    *)
-        sudo apt install -y $__dir/builddep/*.deb
-        ;;
-esac
 
-
+dpkg --compare-versions $__debhelper_ver le '13.1~' && \
+   sudo apt install -y $__dir/builddep/*.deb
 
 cd $__dir
 [[ -d build ]] && rm -rf build
