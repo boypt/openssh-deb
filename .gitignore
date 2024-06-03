@@ -2,3 +2,5 @@ build/
 downloads/
 *.swp
 *.tar.gz
+*.deb
+*.udeb
