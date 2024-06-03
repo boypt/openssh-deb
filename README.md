@@ -54,7 +54,7 @@ docker build \
     .
 
 # run the build process
-docker run --rm -v $PWD/build:/data/output opensshbuild
+docker run --rm -v $PWD/output:/data/output opensshbuild
 
 # clean up docker image
 docker image rm opensshbuild
@@ -63,11 +63,11 @@ docker builder prune
 
 ## Install DEBs
 
-All DEBs are generated right under `build` directory. (either direct build or docker build).
+Generated DEBs are right under the `output` directory. (either direct build or docker build).
 
 ```bash
-ls -l build/*.deb
+ls -l output/*.deb
 
-# Ignore thoses files with dbgsym and tests
-find build -maxdepth 1 ! -name '*dbgsym*' ! -name '*tests*' -name '*.deb' | xargs sudo apt install -y
+# Ignore dbgsym and tests
+find output -maxdepth 1 ! -name '*dbgsym*' ! -name '*tests*' -name '*.deb' | xargs sudo apt install -y
 ```
