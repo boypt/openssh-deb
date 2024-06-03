@@ -14,9 +14,9 @@ Similar Project:　[Backport OpenSSH RPM for CentOS](https://github.com/boypt/op
 - Ubuntu 24.04
 - Ubuntu 22.04
 - Ubuntu 20.04
-- Ubuntu 18.04 *(Not valid via docker, build error cause of `glibc`)*
-- Debian bookworm
-- Debian bullseye
+- Debian 13/trixie
+- Debian 12/bookworm
+- Debian 11/bullseye
 
 ## Direct Build
 
@@ -54,7 +54,7 @@ docker build \
     .
 
 # run the build process
-docker run --rm -v $PWD:/data/output opensshbuild
+docker run --rm -v $PWD/build:/data/output opensshbuild
 
 # clean up docker image
 docker image rm opensshbuild
