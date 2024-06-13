@@ -6,8 +6,10 @@ Similar Project:　[Backport OpenSSH RPM for CentOS](https://github.com/boypt/op
 
 ### Current Version:
 
-- OpenSSH 9.7p1 (defined in `version.env`)
-- OpenSSL 3.0.13
+Package version are defined in `version.env` file.
+
+- OpenSSH 9.7p1
+- OpenSSL 3.0.14
 
 ### Supported (tested) Distro:
 
