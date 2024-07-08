@@ -13,11 +13,11 @@ __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 __file="${__dir}/$(basename "${BASH_SOURCE[0]}")"
 __base="$(basename ${__file} .sh)"
 __root="$(cd "$(dirname "${__dir}")" && pwd)" # <-- change this as it depends on your app
-__libfido2_ver="$(dpkg-query -f '${Version}' -W libfido2-dev || echo '0.0.0')"
-__debhelper_ver="$(dpkg-query -f '${Version}' -W debhelper || echo '0.0.0')"
 
-arg1="${1:-}"
-
+__libfido2_ver="$(dpkg-query -f '${Version}' -W libfido2-dev)"
+[[ -z $__libfido2_ver ]] && __libfido2_ver="0.0.0"
+__debhelper_ver="$(dpkg-query -f '${Version}' -W debhelper)"
+[[ -z $__debhelper_ver ]] && __debhelper_ver="0.0.0"
 
 source $__dir/version.env
 SOURCES=(
