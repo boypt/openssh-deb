@@ -73,3 +73,29 @@ ls -l output/*.deb
 # Ignore dbgsym and tests
 find output -maxdepth 1 ! -name '*dbgsym*' ! -name '*tests*' -name '*.deb' | xargs sudo apt install -y
 ```
+
+## NOTES
+
+If you install backported openssh 9.8+ on older distros, some other programs may face problems while interacting with openssh service. Because since openssh-9.8, the subprocess name have changed from `sshd` to `sshd-session`.
+
+### Known programs with issues 
+
+- fail2ban
+- sshguard
+
+Make sure to upgrade or reconfigure them to meet the latest changes.
+
+#### fail2ban
+
+change in `filter.d/sshd.conf`:
+
+```
+_daemon = sshd
+```
+
+into
+
+```
+_daemon = sshd(?:-session)?
+```
+
