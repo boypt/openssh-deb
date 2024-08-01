@@ -19,6 +19,8 @@ Package version are defined in `version.env` file.
 - Debian 13/trixie
 - Debian 12/bookworm
 - Debian 11/bullseye
+- UnionTech OS Desktop 20 Home (Debian GLIBC 2.28.21-1+deepin-1)
+- 
 
 ## Direct Build
 
