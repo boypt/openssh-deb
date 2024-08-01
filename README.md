@@ -112,10 +112,10 @@ some extra steps are needed to install on these special distros.
 
 ##### UnionTech OS Desktop 20 Home (Debian GLIBC 2.28.21-1+deepin-1) 
 
-Need to install package from debian/bullseye to meet the build process.
-
-- [bullseye/dwz](https://packages.debian.org/bullseye/dwz)
-- [bullseye/dh-runit](https://packages.debian.org/bullseye/dh-runit)
+1. Exclude `libfido2-dev` from the build Dependencies intall command, it's not available.
+2. Install following packages from `debian/bullseye`.
+    - [bullseye/dwz](https://packages.debian.org/bullseye/dwz)
+    - [bullseye/dh-runit](https://packages.debian.org/bullseye/dh-runit)
 
 ##### Kylin V10 SP1 (Ubuntu GLIBC 2.31-0kylin9.2k0.1)
 
