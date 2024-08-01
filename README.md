@@ -121,4 +121,4 @@ some extra steps are needed to install on these special distros.
 
 Run `./compile.sh` from the desktop Terminal(`mate-terminal`). During install the `builddep/*.deb`, a `kysec_auth` dialog would pop up asking for installing permissions. Manual click on the permit button is needed. 
 
-If running in a ssh session, the compile script fail without permission to install.
+If running in a ssh session, the compile script would fail without permissions.
