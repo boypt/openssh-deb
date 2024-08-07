@@ -20,6 +20,9 @@ __debhelper_ver="$(dpkg-query -f '${Version}' -W debhelper || true)"
 [[ -z $__debhelper_ver ]] && __debhelper_ver="0.0.0"
 
 source $__dir/version.env
+
+echo "-- Build OpenSSH : ${OPENSSH_SIDPKG}"
+echo "-- Linked OpenSSL: ${OPENSSLSRC/.tar.gz/}"
 SOURCES=(
 	openssh_${OPENSSH_SIDPKG}.debian.tar.xz \
 	openssh_${OPENSSH_SIDPKG}.dsc \
@@ -30,7 +33,7 @@ SOURCES=(
 
 CHECKEXISTS() {
   if [[ ! -f $__dir/downloads/$1 ]];then
-    echo "$1 not found, run 'pullsrc.sh', or manually put it in the downloads dir."
+    echo "-- Error: $1 not found, run 'pullsrc.sh', or manually put it in the downloads dir."
     exit 1
   fi
 }
