@@ -53,7 +53,8 @@ docker build \
     -t opensshbuild \
     --build-arg DISTRO=ubuntu \
     --build-arg DISTVER=22.04 \
-    --build-arg APT_MIRROR=ftp.us.debian.org \
+    --build-arg DEBIAN_SOURCE=http://ftp.debian.org/debian/ \
+    --build-arg OPENPGP_SERVER=keyserver.ubuntu.com \
     -f ./docker/Dockerfile \
     .
 

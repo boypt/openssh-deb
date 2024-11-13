@@ -6,6 +6,10 @@ WORKDIR /data
 COPY . /data
 ARG APT_MIRROR=""
 ENV DEBIAN_FRONTEND=noninteractive
+# The following parameters are used for installing Debian distribution packages on Ubuntu systems.
+# *ONLY* used at Jammy version.
+ARG DEBIAN_SOURCE="http://ftp.debian.org/debian/"
+ARG OPENPGP_SERVER="keyserver.ubuntu.com"
 
 RUN if [ ! -z "$APT_MIRROR" ]; then \
         if [ -f /etc/apt/sources.list ]; then \
@@ -20,9 +24,22 @@ RUN if [ ! -z "$APT_MIRROR" ]; then \
     if [ $(lsb_release -sc) != "focal" ]; then \
         apt install -y dh-virtualenv; \
     fi && \
-    apt install -y curl wget sudo pkgconf build-essential fakeroot dpkg-dev debhelper debhelper-compat dh-exec dh-runit libaudit-dev libedit-dev libgtk-3-dev libselinux1-dev libsystemd-dev libkrb5-dev libpam0g-dev libwrap0-dev && \
+    apt install -y \
+        build-essential curl debhelper debhelper-compat dh-exec dh-runit dpkg-dev \
+        fakeroot libaudit-dev libedit-dev libgtk-3-dev libkrb5-dev libpam0g-dev \
+        libselinux1-dev libsystemd-dev libwrap0-dev pkgconf sudo wget && \
     if [ $(apt-cache search --names-only 'libfido2-dev' | wc -l) -gt 0 ]; then \
         apt install -y libfido2-dev libcbor-dev; \
+    fi && \
+    if [ $(lsb_release -sc) = "jammy" ]; then \
+        echo "deb $DEBIAN_SOURCE sid main" >> /etc/apt/sources.list; \
+        KEYS=$(apt update 2>&1 | grep -o 'NO_PUBKEY [A-F0-9]\+' | sed 's/NO_PUBKEY //' | sort | uniq); \
+        for KEY in ${KEYS}; \
+        do \
+            apt-key adv --keyserver ${OPENPGP_SERVER} --recv-keys ${KEY}; \
+        done; \
+        apt update; \
+        apt install -y dh-sequence-movetousr; \
     fi && \
     apt clean all && \
     bash /data/pullsrc.sh
