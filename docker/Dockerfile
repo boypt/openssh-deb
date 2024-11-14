@@ -21,7 +21,8 @@ RUN if [ ! -z "$APT_MIRROR" ]; then \
     fi && \
     apt update && apt upgrade -y && \
     apt install -y lsb-release && \
-    if [ $(lsb_release -sc) != "focal" ]; then \
+    CODE_NAME=$(lsb_release -sc) && \
+    if [ ${CODE_NAME} != "focal" ]; then \
         apt install -y dh-virtualenv; \
     fi && \
     apt install -y \
@@ -31,16 +32,21 @@ RUN if [ ! -z "$APT_MIRROR" ]; then \
     if [ $(apt-cache search --names-only 'libfido2-dev' | wc -l) -gt 0 ]; then \
         apt install -y libfido2-dev libcbor-dev; \
     fi && \
-    if [ $(lsb_release -sc) = "jammy" ]; then \
-        echo "deb $DEBIAN_SOURCE sid main" >> /etc/apt/sources.list; \
-        KEYS=$(apt update 2>&1 | grep -o 'NO_PUBKEY [A-F0-9]\+' | sed 's/NO_PUBKEY //' | sort | uniq); \
-        for KEY in ${KEYS}; \
-        do \
-            apt-key adv --keyserver ${OPENPGP_SERVER} --recv-keys ${KEY}; \
-        done; \
-        apt update; \
-        apt install -y dh-sequence-movetousr; \
-    fi && \
+    case ${CODE_NAME} in \
+        jammy|bookworm|bullseye) \
+            echo "deb $DEBIAN_SOURCE sid main" >> /etc/apt/sources.list; \
+            KEYS=$(apt update 2>&1 | grep -o 'NO_PUBKEY [A-F0-9]\+' | sed 's/NO_PUBKEY //' | sort | uniq); \
+            for KEY in ${KEYS}; \
+            do \
+                apt-key adv --keyserver ${OPENPGP_SERVER} --recv-keys ${KEY}; \
+            done; \
+            apt update; \
+            apt install -y dh-sequence-movetousr; \
+            ;; \
+        *) \
+            echo "$CODENAME is NOT NEED to add Debian sources."; \
+            ;; \
+    esac && \
     apt clean all && \
     bash /data/pullsrc.sh
 
