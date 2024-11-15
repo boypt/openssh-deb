@@ -101,6 +101,35 @@ jobs:
           name: ubuntu20-arm64
           path: ${{ github.workspace }}/output
 
+  build_ubuntu18:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: "Compile Ubuntu 18.04 (bionic) [arm64]"
+        run: |
+          docker run --rm --platform linux/arm64 -v ${{ github.workspace }}/output:/data/output ${{ secrets.DOCKER_USERNAME }}/${{ github.event.repository.name }}:ubuntu18
+          sudo apt install -y rename
+          source ${{ github.workspace }}/version.env
+          pushd ${{ github.workspace }}/output
+          sudo rename "s/$OPENSSH_SIDPKG/$OPENSSH_SIDPKG-bionic/" *.deb
+          popd
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ubuntu18-arm64
+          path: ${{ github.workspace }}/output
+
   build_debian13:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
@@ -195,6 +224,7 @@ jobs:
       - build_ubuntu24
       - build_ubuntu22
       - build_ubuntu20
+      - build_ubuntu18
       - build_debian13
       - build_debian12
       - build_debian11
@@ -215,6 +245,11 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: ubuntu20-arm64
+          path: ./output
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: ubuntu18-arm64
           path: ./output
 
       - uses: actions/download-artifact@v4

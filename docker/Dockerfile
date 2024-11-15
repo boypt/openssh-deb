@@ -6,8 +6,11 @@ WORKDIR /data
 COPY . /data
 ARG APT_MIRROR=""
 ENV DEBIAN_FRONTEND=noninteractive
-# The following parameters are used for installing Debian distribution packages on Ubuntu systems.
-# *ONLY* used at Jammy version.
+# The following parameters are used for installing Debian distribution packages
+# on Ubuntu systems or old Debian systems.
+# *ONLY* used at:
+# Ubuntu series: jammy & bionic
+# Debian series: bullseye & bookworm
 ARG DEBIAN_SOURCE="http://ftp.debian.org/debian/"
 ARG OPENPGP_SERVER="keyserver.ubuntu.com"
 
@@ -42,6 +45,16 @@ RUN if [ ! -z "$APT_MIRROR" ]; then \
             done; \
             apt update; \
             apt install -y dh-sequence-movetousr; \
+            ;; \
+        bionic) \
+            echo "deb $DEBIAN_SOURCE bullseye main" >> /etc/apt/sources.list; \
+            KEYS=$(apt update 2>&1 | grep -o 'NO_PUBKEY [A-F0-9]\+' | sed 's/NO_PUBKEY //' | sort | uniq); \
+            for KEY in ${KEYS}; \
+            do \
+                apt-key adv --keyserver ${OPENPGP_SERVER} --recv-keys ${KEY}; \
+            done; \
+            apt update; \
+            apt install -y dwz dh-runit; \
             ;; \
         *) \
             echo "$CODENAME is NOT NEED to add Debian sources."; \
