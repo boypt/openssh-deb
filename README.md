@@ -8,8 +8,10 @@ Similar Project:　[Backport OpenSSH RPM for CentOS](https://github.com/boypt/op
 
 Package version are defined in `version.env` file.
 
-- OpenSSH 9.8p1
-- OpenSSL 3.0.15
+Current version: (will follow debian sid upstream automatically when `./pullsrc.sh` is called)
+
+- OpenSSH 9.9p2
+- OpenSSL 3.0.16
 
 ### Supported (tested) Distro:
 
