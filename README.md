@@ -108,9 +108,9 @@ _daemon = sshd(?:-session)?
 ```
 
 
-#### Compile Issues
+### Distro Issues
 
-some extra steps are needed to install on these special distros.
+Extra steps are needed to install on some distros.
 
 ##### UnionTech OS Desktop 20 Home (Debian GLIBC 2.28.21-1+deepin-1) 
 
@@ -121,6 +121,8 @@ some extra steps are needed to install on these special distros.
 
 ##### Kylin V10 SP1 (Ubuntu GLIBC 2.31-0kylin9.2k0.1)
 
-Run `./compile.sh` from the desktop Terminal(`mate-terminal`). During install the `builddep/*.deb`, a `kysec_auth` dialog would pop up asking for installing permissions. Manual click on the permit button is needed. 
+Run `./compile.sh` from the desktop Terminal(`mate-terminal`). 
+
+During install the `builddep/*.deb`, a `kysec_auth` dialog would pop up asking for installing permissions. Manual click on the permit button is needed. 
 
 If running in a ssh session, the compile script would fail without permissions.
