@@ -8,19 +8,15 @@ Similar Project:　[Backport OpenSSH RPM for CentOS](https://github.com/boypt/op
 
 Package version are defined in `version.env` file.
 
-Current version: (will follow debian sid upstream automatically when `./pullsrc.sh` is called)
+Current version: (follows `debian/sid` automatically)
 
 - OpenSSH 9.9p2
 - OpenSSL 3.0.16
 
 ### Supported (tested) Distro:
 
-- Ubuntu 24.04
-- Ubuntu 22.04
-- Ubuntu 20.04
-- Debian 13/trixie
-- Debian 12/bookworm
-- Debian 11/bullseye
+- Ubuntu 24.04/22.04/20.04
+- Debian 13/trixie 12/bookworm 11/bullseye
 - UnionTech OS Desktop 20 Home (Debian GLIBC 2.28.21-1+deepin-1) 
 - Kylin V10 SP1 (Ubuntu GLIBC 2.31-0kylin9.2k0.1)
 
@@ -39,13 +35,13 @@ Current version: (will follow debian sid upstream automatically when `./pullsrc.
 
 ## Docker Build
 
-Build without installing a bunch of dev packages, also for a different distro by changing build-arg.
+Build without installing a bunch of dev packages, and build for different versions of distros.
 
 ```bash
 # pull source from debian sid
 ./pullsrc.sh
 
-# build a docker image that fits your target system.
+# run with a docker image that fits your target system.
 docker run --rm -v "$(pwd):/work" -w /work ubuntu:20.04 bash -c "./install_deps.sh && ./compile.sh"
 
 # clean up docker image
@@ -54,13 +50,14 @@ docker builder prune
 
 ## Install DEBs
 
-Generated DEBs are right under the `output` directory. (either direct build or docker build).
+Generated DEBs are right under the `output` directory. (both direct build and docker build).
 
 ```bash
 ls -l output/*.deb
 
 # Ignore dbgsym and tests
-find output -maxdepth 1 ! -name '*dbgsym*' ! -name '*tests*' -name '*.deb' | xargs sudo apt install -y
+find output -maxdepth 1 ! -name '*dbgsym*' ! -name '*tests*' -name '*.deb' | xargs \
+    sudo apt install -y
 ```
 
 ## NOTES
