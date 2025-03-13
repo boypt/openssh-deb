@@ -46,7 +46,7 @@ Build without installing a bunch of dev packages, also for a different distro by
 ./pullsrc.sh
 
 # build a docker image that fits your target system.
-docker run --rm -v "$(pwd):/work" -w /work ubuntu:20.04 bash -c "install_deps.sh && compile.sh"
+docker run --rm -v "$(pwd):/work" -w /work ubuntu:20.04 bash -c "./install_deps.sh && ./compile.sh"
 
 # clean up docker image
 docker builder prune
