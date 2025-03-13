@@ -55,7 +55,7 @@ docker build \
     -t opensshbuild \
     --build-arg DISTRO=ubuntu \
     --build-arg DISTVER=22.04 \
-    --build-arg APT_MIRROR=deb.debian.org \
+    --build-arg APT_MIRROR=archive.ubuntu.com \
     -f ./docker/Dockerfile \
     .
 
