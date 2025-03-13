@@ -15,7 +15,7 @@ __base="$(basename ${__file} .sh)"
 __root="$(cd "$(dirname "${__dir}")" && pwd)" # <-- change this as it depends on your app
 
 __libssl="$(dpkg-query -f '${Version}' -W libssl-dev || true)"
-[[ -z $__ ]] && __libssl="0.0.0"
+[[ -z $__libssl ]] && __libssl="0.0.0"
 __libfido2_ver="$(dpkg-query -f '${Version}' -W libfido2-dev || true)"
 [[ -z $__libfido2_ver ]] && __libfido2_ver="0.0.0"
 __debhelper_ver="$(dpkg-query -f '${Version}' -W debhelper || true)"
