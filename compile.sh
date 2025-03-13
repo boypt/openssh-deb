@@ -53,7 +53,7 @@ mkdir -p build && pushd build
 
 #### Build OPENSSL
 STATIC_OPENSSL=0
-if dpkg --compare-versions $__libssl lt '3.0.0'; then
+if dpkg --compare-versions $__libssl lt '3.0.0' || [[ -n ${FORCESSL} ]]; then
 	STATIC_OPENSSL=1
 	mkdir -p openssl
 	tar xfz $__dir/downloads/$OPENSSLSRC --strip-components=1 -C openssl
