@@ -18,25 +18,27 @@ __libssl="$(dpkg-query -f '${Version}' -W libssl-dev || true)"
 [[ -z $__libssl ]] && __libssl="0.0.0"
 __libfido2_ver="$(dpkg-query -f '${Version}' -W libfido2-dev || true)"
 [[ -z $__libfido2_ver ]] && __libfido2_ver="0.0.0"
-__debhelper_ver="$(dpkg-query -f '${Version}' -W debhelper || true)"
-[[ -z $__debhelper_ver ]] && __debhelper_ver="0.0.0"
 
 source $__dir/version.env
-
 STATIC_OPENSSL=0
 if dpkg --compare-versions $__libssl lt '3.0.0' || [[ -n ${FORCESSL+x} ]]; then
 	STATIC_OPENSSL=1
 fi
 
-echo "-- Build OpenSSH : ${OPENSSH_SIDPKG}"
-echo "-- Linked OpenSSL: ${OPENSSLSRC/.tar.gz/}"
 SOURCES=(
 	openssh_${OPENSSH_SIDPKG}.debian.tar.xz \
 	openssh_${OPENSSH_SIDPKG}.dsc \
 	openssh_${OPENSSHVER}.orig.tar.gz \
 	openssh_${OPENSSHVER}.orig.tar.gz.asc \
 )
-[[ $STATIC_OPENSSL -eq 1 ]] && SOURCES+=("$OPENSSLSRC")
+
+echo "-- Build OpenSSH : ${OPENSSH_SIDPKG}"
+if [[ $STATIC_OPENSSL -eq 1 ]]; then 
+	echo "-- Linked OpenSSL: ${OPENSSLSRC/.tar.gz/}"
+	SOURCES+=("$OPENSSLSRC")
+else
+	echo "-- Linked OpenSSL: libssl-dev ${__libssl}"
+fi
 
 CHECKEXISTS() {
   if [[ ! -f $__dir/downloads/$1 ]];then
@@ -48,9 +50,6 @@ CHECKEXISTS() {
 for fn in ${SOURCES[@]}; do
   CHECKEXISTS $fn 
 done
-
-dpkg --compare-versions $__debhelper_ver le '13.1~' && \
-   sudo apt install -y $__dir/builddep/*.deb
 
 cd $__dir
 [[ -d build ]] && rm -rf build

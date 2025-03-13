@@ -1,4 +1,6 @@
 #!/bin/bash
+__debhelper_ver="$(dpkg-query -f '${Version}' -W debhelper || true)"
+[[ -z $__debhelper_ver ]] && __debhelper_ver="0.0.0"
 
 export DEBIAN_FRONTEND=noninteractive
 
@@ -19,4 +21,7 @@ apt install -y --no-install-recommends wget sudo pkgconf build-essential fakeroo
 if [[ $(apt-cache search --names-only 'libfido2-dev' | wc -l) -gt 0 ]]; then
 	apt install -y libfido2-dev libcbor-dev
 fi
+
+dpkg --compare-versions $__debhelper_ver le '13.1~' && \
+   sudo apt install -y $__dir/builddep/*.deb
 

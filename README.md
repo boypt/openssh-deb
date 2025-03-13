@@ -28,12 +28,7 @@ Current version: (will follow debian sid upstream automatically when `./pullsrc.
 
 ```bash
 # Install Dependencies
-sudo apt install pkgconf build-essential fakeroot \
-    dpkg-dev debhelper debhelper-compat dh-exec dh-runit \
-    libkrb5-dev libpam0g-dev libwrap0-dev \
-    libaudit-dev libedit-dev libfido2-dev \
-    libgtk-3-dev libselinux1-dev libsystemd-dev \
-    libcbor-dev
+./install_deps.sh
 
 # pull source
 ./pullsrc.sh
@@ -51,19 +46,9 @@ Build without installing a bunch of dev packages, also for a different distro by
 ./pullsrc.sh
 
 # build a docker image that fits your target system.
-docker build \
-    -t opensshbuild \
-    --build-arg DISTRO=ubuntu \
-    --build-arg DISTVER=22.04 \
-    --build-arg APT_MIRROR=archive.ubuntu.com \
-    -f ./docker/Dockerfile \
-    .
-
-# run the build process
-docker run --rm -v $PWD/output:/data/output opensshbuild
+docker run --rm -v "$(pwd):/work" -w /work ubuntu:20.04 bash -c "install_deps.sh && compile.sh"
 
 # clean up docker image
-docker image rm opensshbuild
 docker builder prune
 ```
 
