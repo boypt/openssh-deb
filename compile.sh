@@ -14,6 +14,8 @@ __file="${__dir}/$(basename "${BASH_SOURCE[0]}")"
 __base="$(basename ${__file} .sh)"
 __root="$(cd "$(dirname "${__dir}")" && pwd)" # <-- change this as it depends on your app
 
+__openssl_ver="$(dpkg-query -f '${Version}' -W openssl-dev || true)"
+[[ -z $__openssl_ver ]] && __openssl_ver="0.0.0"
 __libfido2_ver="$(dpkg-query -f '${Version}' -W libfido2-dev || true)"
 [[ -z $__libfido2_ver ]] && __libfido2_ver="0.0.0"
 __debhelper_ver="$(dpkg-query -f '${Version}' -W debhelper || true)"
@@ -50,29 +52,34 @@ cd $__dir
 mkdir -p build && pushd build
 
 #### Build OPENSSL
-mkdir -p openssl
-tar xfz $__dir/downloads/$OPENSSLSRC --strip-components=1 -C openssl
-pushd openssl
-./config shared zlib -fPIC
-make -j$(nproc)
-OPENSSLDIR=$PWD
-popd
+STATIC_OPENSSL=0
+if dpkg --compare-versions $__openssl_ver lt '3.0.0'; then
+	STATIC_OPENSSL=1
+	mkdir -p openssl
+	tar xfz $__dir/downloads/$OPENSSLSRC --strip-components=1 -C openssl
+	pushd openssl
+	./config shared zlib -fPIC
+	make -j$(nproc)
+	OPENSSLDIR=$PWD
+	popd
+fi
 #################
-
 
 dpkg-source -x $__dir/downloads/openssh_${OPENSSH_SIDPKG}.dsc
 
 pushd openssh-${OPENSSHVER}
-# Hack to use the our openssl
-###
+
 if dpkg --compare-versions $__libfido2_ver lt '1.5.0'; then
 	sed -i '/libfido2-dev/d' debian/control
 	sed -i "s|with-security-key-builtin|disable-security-key|" debian/rules
 fi
-sed -i "s|-lcrypto|${OPENSSLDIR}/libcrypto.a -lz -ldl -pthread|g" configure configure.ac
-sed -i '/libssl-dev/d' debian/control
-sed -i "/^confflags += --with-ssl-engine/aconfflags += --with-ssl-dir=${OPENSSLDIR}\nconfflags_udeb += --with-ssl-dir=${OPENSSLDIR}" debian/rules
-sed -i "/^override_dh_auto_configure-arch:/iDEB_CONFIGURE_SCRIPT_ENV += LD_LIBRARY_PATH=${OPENSSLDIR}" debian/rules
+
+if [[ $STATIC_OPENSSL -eq 1 ]]; then
+	sed -i "s|-lcrypto|${OPENSSLDIR}/libcrypto.a -lz -ldl -pthread|g" configure configure.ac
+	sed -i '/libssl-dev/d' debian/control
+	sed -i "/^confflags += --with-ssl-engine/aconfflags += --with-ssl-dir=${OPENSSLDIR}\nconfflags_udeb += --with-ssl-dir=${OPENSSLDIR}" debian/rules
+	sed -i "/^override_dh_auto_configure-arch:/iDEB_CONFIGURE_SCRIPT_ENV += LD_LIBRARY_PATH=${OPENSSLDIR}" debian/rules
+fi
 
 ### Build OpenSSH Package
 env \
