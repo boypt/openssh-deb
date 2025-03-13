@@ -14,8 +14,8 @@ __file="${__dir}/$(basename "${BASH_SOURCE[0]}")"
 __base="$(basename ${__file} .sh)"
 __root="$(cd "$(dirname "${__dir}")" && pwd)" # <-- change this as it depends on your app
 
-__openssl_ver="$(dpkg-query -f '${Version}' -W openssl-dev || true)"
-[[ -z $__openssl_ver ]] && __openssl_ver="0.0.0"
+__libssl="$(dpkg-query -f '${Version}' -W libssl-dev || true)"
+[[ -z $__ ]] && __libssl="0.0.0"
 __libfido2_ver="$(dpkg-query -f '${Version}' -W libfido2-dev || true)"
 [[ -z $__libfido2_ver ]] && __libfido2_ver="0.0.0"
 __debhelper_ver="$(dpkg-query -f '${Version}' -W debhelper || true)"
@@ -53,7 +53,7 @@ mkdir -p build && pushd build
 
 #### Build OPENSSL
 STATIC_OPENSSL=0
-if dpkg --compare-versions $__openssl_ver lt '3.0.0'; then
+if dpkg --compare-versions $__libssl lt '3.0.0'; then
 	STATIC_OPENSSL=1
 	mkdir -p openssl
 	tar xfz $__dir/downloads/$OPENSSLSRC --strip-components=1 -C openssl
