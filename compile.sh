@@ -23,6 +23,11 @@ __debhelper_ver="$(dpkg-query -f '${Version}' -W debhelper || true)"
 
 source $__dir/version.env
 
+STATIC_OPENSSL=0
+if dpkg --compare-versions $__libssl lt '3.0.0' || [[ -n ${FORCESSL+x} ]]; then
+	STATIC_OPENSSL=1
+fi
+
 echo "-- Build OpenSSH : ${OPENSSH_SIDPKG}"
 echo "-- Linked OpenSSL: ${OPENSSLSRC/.tar.gz/}"
 SOURCES=(
@@ -30,8 +35,8 @@ SOURCES=(
 	openssh_${OPENSSH_SIDPKG}.dsc \
 	openssh_${OPENSSHVER}.orig.tar.gz \
 	openssh_${OPENSSHVER}.orig.tar.gz.asc \
-	$OPENSSLSRC \
 )
+[[ $STATIC_OPENSSL -eq 1 ]] && SOURCES+="$OPENSSLSRC"
 
 CHECKEXISTS() {
   if [[ ! -f $__dir/downloads/$1 ]];then
@@ -52,9 +57,7 @@ cd $__dir
 mkdir -p build && pushd build
 
 #### Build OPENSSL
-STATIC_OPENSSL=0
-if dpkg --compare-versions $__libssl lt '3.0.0' || [[ -n ${FORCESSL+x} ]]; then
-	STATIC_OPENSSL=1
+if [[ $STATIC_OPENSSL -eq 1 ]]; then
 	mkdir -p openssl
 	tar xfz $__dir/downloads/$OPENSSLSRC --strip-components=1 -C openssl
 	pushd openssl
@@ -66,7 +69,6 @@ fi
 #################
 
 dpkg-source -x $__dir/downloads/openssh_${OPENSSH_SIDPKG}.dsc
-
 pushd openssh-${OPENSSHVER}
 
 if dpkg --compare-versions $__libfido2_ver lt '1.5.0'; then
