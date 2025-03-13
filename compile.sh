@@ -36,7 +36,7 @@ SOURCES=(
 	openssh_${OPENSSHVER}.orig.tar.gz \
 	openssh_${OPENSSHVER}.orig.tar.gz.asc \
 )
-[[ $STATIC_OPENSSL -eq 1 ]] && SOURCES+="$OPENSSLSRC"
+[[ $STATIC_OPENSSL -eq 1 ]] && SOURCES+=("$OPENSSLSRC")
 
 CHECKEXISTS() {
   if [[ ! -f $__dir/downloads/$1 ]];then
