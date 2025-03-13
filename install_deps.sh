@@ -11,7 +11,7 @@ if [[ ! -z "${APT_MIRROR+x}" ]]; then \
 fi
 
 apt update && apt upgrade -y
-apt install -y --no-install-recommends curl sudo pkgconf build-essential fakeroot \
+apt install -y --no-install-recommends wget sudo pkgconf build-essential fakeroot \
 	dpkg-dev debhelper debhelper-compat dh-exec dh-runit \
 	libaudit-dev libedit-dev libgtk-3-dev libselinux1-dev libsystemd-dev \
 	libkrb5-dev libpam0g-dev libwrap0-dev
