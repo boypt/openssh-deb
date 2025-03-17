@@ -88,6 +88,7 @@ fi
 ## Check build deps
 if ! dpkg-checkbuilddeps; then
 	echo "The build dependencies are not met, run ./install_deps.sh first."
+	exit 1
 fi
 
 ### Build OpenSSH Package
