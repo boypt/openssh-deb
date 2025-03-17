@@ -67,19 +67,27 @@ if [[ $STATIC_OPENSSL -eq 1 ]]; then
 fi
 #################
 
+## Extract dpkg source
 dpkg-source -x $__dir/downloads/openssh_${OPENSSH_SIDPKG}.dsc
 pushd openssh-${OPENSSHVER}
 
+## disable fido support on older distro
 if dpkg --compare-versions $__libfido2_ver lt '1.5.0'; then
 	sed -i '/libfido2-dev/d' debian/control
 	sed -i "s|with-security-key-builtin|disable-security-key|" debian/rules
 fi
 
+## link openssl staticlly on older distro / or forced with `FORCESSL=1`
 if [[ $STATIC_OPENSSL -eq 1 ]]; then
 	sed -i "s|-lcrypto|${OPENSSLDIR}/libcrypto.a -lz -ldl -pthread|g" configure configure.ac
 	sed -i '/libssl-dev/d' debian/control
 	sed -i "/^confflags += --with-ssl-engine/aconfflags += --with-ssl-dir=${OPENSSLDIR}\nconfflags_udeb += --with-ssl-dir=${OPENSSLDIR}" debian/rules
 	sed -i "/^override_dh_auto_configure-arch:/iDEB_CONFIGURE_SCRIPT_ENV += LD_LIBRARY_PATH=${OPENSSLDIR}" debian/rules
+fi
+
+## Check build deps
+if ! dpkg-checkbuilddeps; then
+	echo "The build dependencies are not met, run ./install_deps.sh first."
 fi
 
 ### Build OpenSSH Package
