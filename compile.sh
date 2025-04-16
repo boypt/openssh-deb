@@ -85,6 +85,12 @@ if [[ $STATIC_OPENSSL -eq 1 ]]; then
 	sed -i "/^override_dh_auto_configure-arch:/iDEB_CONFIGURE_SCRIPT_ENV += LD_LIBRARY_PATH=${OPENSSLDIR}" debian/rules
 fi
 
+## wtmpdb not available in older distros
+if ! dpkg -l libwtmpdb-dev; then
+	sed -i '/libwtmpdb-dev/d' debian/control
+	sed -i '/with-wtmpdb/d' debian/rules
+fi
+
 ## Check build deps
 if ! dpkg-checkbuilddeps; then
 	echo "The build dependencies are not met, run ./install_deps.sh first."
