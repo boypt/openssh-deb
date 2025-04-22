@@ -14,22 +14,31 @@ __file="${__dir}/$(basename "${BASH_SOURCE[0]}")"
 __base="$(basename ${__file} .sh)"
 __root="$(cd "$(dirname "${__dir}")" && pwd)" # <-- change this as it depends on your app
 
+__libssl="$(dpkg-query -f '${Version}' -W libssl-dev || true)"
+[[ -z $__libssl ]] && __libssl="0.0.0"
 __libfido2_ver="$(dpkg-query -f '${Version}' -W libfido2-dev || true)"
 [[ -z $__libfido2_ver ]] && __libfido2_ver="0.0.0"
-__debhelper_ver="$(dpkg-query -f '${Version}' -W debhelper || true)"
-[[ -z $__debhelper_ver ]] && __debhelper_ver="0.0.0"
 
 source $__dir/version.env
+STATIC_OPENSSL=0
+if dpkg --compare-versions $__libssl lt '3.0.0' || [[ -n ${FORCESSL+x} ]]; then
+	STATIC_OPENSSL=1
+fi
 
-echo "-- Build OpenSSH : ${OPENSSH_SIDPKG}"
-echo "-- Linked OpenSSL: ${OPENSSLSRC/.tar.gz/}"
 SOURCES=(
 	openssh_${OPENSSH_SIDPKG}.debian.tar.xz \
 	openssh_${OPENSSH_SIDPKG}.dsc \
 	openssh_${OPENSSHVER}.orig.tar.gz \
 	openssh_${OPENSSHVER}.orig.tar.gz.asc \
-	$OPENSSLSRC \
 )
+
+echo "-- Build OpenSSH : ${OPENSSH_SIDPKG}"
+if [[ $STATIC_OPENSSL -eq 1 ]]; then 
+	echo "-- Linked OpenSSL: ${OPENSSLSRC/.tar.gz/}"
+	SOURCES+=("$OPENSSLSRC")
+else
+	echo "-- Linked OpenSSL: libssl-dev ${__libssl}"
+fi
 
 CHECKEXISTS() {
   if [[ ! -f $__dir/downloads/$1 ]];then
@@ -42,37 +51,51 @@ for fn in ${SOURCES[@]}; do
   CHECKEXISTS $fn 
 done
 
-dpkg --compare-versions $__debhelper_ver le '13.1~' && \
-   sudo apt install -y $__dir/builddep/*.deb
-
 cd $__dir
 [[ -d build ]] && rm -rf build
 mkdir -p build && pushd build
 
 #### Build OPENSSL
-mkdir -p openssl
-tar xfz $__dir/downloads/$OPENSSLSRC --strip-components=1 -C openssl
-pushd openssl
-./config shared zlib -fPIC
-make -j$(nproc)
-OPENSSLDIR=$PWD
-popd
+if [[ $STATIC_OPENSSL -eq 1 ]]; then
+	mkdir -p openssl
+	tar xfz $__dir/downloads/$OPENSSLSRC --strip-components=1 -C openssl
+	pushd openssl
+	./config shared zlib -fPIC
+	make -j$(nproc)
+	OPENSSLDIR=$PWD
+	popd
+fi
 #################
 
-
+## Extract dpkg source
 dpkg-source -x $__dir/downloads/openssh_${OPENSSH_SIDPKG}.dsc
-
 pushd openssh-${OPENSSHVER}
-# Hack to use the our openssl
-###
+
+## disable fido support on older distro
 if dpkg --compare-versions $__libfido2_ver lt '1.5.0'; then
 	sed -i '/libfido2-dev/d' debian/control
 	sed -i "s|with-security-key-builtin|disable-security-key|" debian/rules
 fi
-sed -i "s|-lcrypto|${OPENSSLDIR}/libcrypto.a -lz -ldl -pthread|g" configure configure.ac
-sed -i '/libssl-dev/d' debian/control
-sed -i "/^confflags += --with-ssl-engine/aconfflags += --with-ssl-dir=${OPENSSLDIR}\nconfflags_udeb += --with-ssl-dir=${OPENSSLDIR}" debian/rules
-sed -i "/^override_dh_auto_configure-arch:/iDEB_CONFIGURE_SCRIPT_ENV += LD_LIBRARY_PATH=${OPENSSLDIR}" debian/rules
+
+## link openssl staticlly on older distro / or forced with `FORCESSL=1`
+if [[ $STATIC_OPENSSL -eq 1 ]]; then
+	sed -i "s|-lcrypto|${OPENSSLDIR}/libcrypto.a -lz -ldl -pthread|g" configure configure.ac
+	sed -i '/libssl-dev/d' debian/control
+	sed -i "/^confflags += --with-ssl-engine/aconfflags += --with-ssl-dir=${OPENSSLDIR}\nconfflags_udeb += --with-ssl-dir=${OPENSSLDIR}" debian/rules
+	sed -i "/^override_dh_auto_configure-arch:/iDEB_CONFIGURE_SCRIPT_ENV += LD_LIBRARY_PATH=${OPENSSLDIR}" debian/rules
+fi
+
+## wtmpdb not available in older distros
+if ! dpkg -l libwtmpdb-dev; then
+	sed -i '/libwtmpdb-dev/d' debian/control
+	sed -i '/with-wtmpdb/d' debian/rules
+fi
+
+## Check build deps
+if ! dpkg-checkbuilddeps; then
+	echo "The build dependencies are not met, run ./install_deps.sh first."
+	exit 1
+fi
 
 ### Build OpenSSH Package
 env \
