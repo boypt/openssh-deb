@@ -63,7 +63,7 @@ apt install -y lsb-release && \
             apt install -y dwz dh-runit; \
             ;; \
         *) \
-            echo "$CODENAME is NOT NEED to add Debian sources."; \
+            echo "$CODE_NAME is NOT NEED to add Debian sources."; \
             ;; \
     esac
 
