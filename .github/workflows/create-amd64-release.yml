@@ -25,6 +25,7 @@ jobs:
 
       - name: "Compile Ubuntu 24.04 (noble) [amd64]"
         run: |
+          ./pullsrc.sh
           docker run --rm -v ${{ github.workspace }}:/work -w /work  library/ubuntu:24.04 bash -c "./install_deps.sh && ./compile.sh"
           sudo apt install -y rename
           source ${{ github.workspace }}/version.env
@@ -49,6 +50,7 @@ jobs:
 
       - name: "Compile Ubuntu 22.04 (jammy) [amd64]"
         run: |
+          ./pullsrc.sh
           docker run --rm -v ${{ github.workspace }}:/work -w /work  library/ubuntu:22.04 bash -c "./install_deps.sh && ./compile.sh"
           sudo apt install -y rename
           source ${{ github.workspace }}/version.env
@@ -72,6 +74,7 @@ jobs:
 
       - name: "Compile Ubuntu 20.04 (focal) [amd64]"
         run: |
+          ./pullsrc.sh
           docker run --rm -v ${{ github.workspace }}:/work -w /work  library/ubuntu:20.04 bash -c "./install_deps.sh && ./compile.sh"
           sudo apt install -y rename
           source ${{ github.workspace }}/version.env
@@ -95,6 +98,7 @@ jobs:
 
       - name: "Compile Ubuntu 18.04 (bionic) [amd64]"
         run: |
+          ./pullsrc.sh
           docker run --rm -v ${{ github.workspace }}:/work -w /work  library/ubuntu:18.04 bash -c "./install_deps.sh && ./compile.sh"
           sudo apt install -y rename
           source ${{ github.workspace }}/version.env
@@ -118,6 +122,7 @@ jobs:
 
       - name: "Compile Debian 13 (trixie) [amd64]"
         run: |
+          ./pullsrc.sh
           docker run --rm -v ${{ github.workspace }}:/work -w /work  library/debian:trixie bash -c "./install_deps.sh && ./compile.sh"
           sudo apt install -y rename
           source ${{ github.workspace }}/version.env
@@ -142,6 +147,7 @@ jobs:
 
       - name: "Compile Debian 12 (bookworm) [amd64]"
         run: |
+          ./pullsrc.sh
           docker run --rm -v ${{ github.workspace }}:/work -w /work  library/debian:bookworm bash -c "./install_deps.sh && ./compile.sh"
           sudo apt install -y rename
           source ${{ github.workspace }}/version.env
@@ -166,6 +172,7 @@ jobs:
 
       - name: "Compile Debian 11 (bullseye) [amd64]"
         run: |
+          ./pullsrc.sh
           docker run --rm -v ${{ github.workspace }}:/work -w /work  library/debian:bullseye bash -c "./install_deps.sh && ./compile.sh"
           sudo apt install -y rename
           source ${{ github.workspace }}/version.env
