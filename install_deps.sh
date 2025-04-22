@@ -35,6 +35,14 @@ if [[ $(apt-cache search --names-only 'libfido2-dev' | wc -l) -gt 0 ]]; then
 	apt install -y libfido2-dev libcbor-dev
 fi
 
+# The following parameters are used for installing Debian distribution packages
+# on Ubuntu systems or old Debian systems.
+# *ONLY* used at:
+# Ubuntu series: jammy & bionic
+# Debian series: bullseye & bookworm
+DEBIAN_SOURCE="http://ftp.debian.org/debian/"
+OPENPGP_SERVER="keyserver.ubuntu.com"
+
 
 apt install -y lsb-release && \
     CODE_NAME=$(lsb_release -sc) && \
