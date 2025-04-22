@@ -274,12 +274,17 @@ jobs:
           name: debian11-arm64
           path: ./output
 
+      - name: Remove dbgsym packages
+        run: |
+          rm -fv ${{ github.workspace }}/output/*dbgsym*
+
       - name: Get tag message
         run: |
           echo -e "> Automated release created by GitHub Actions.\n" > ${{ github.workspace }}/RELEASE.md
           GITHUB_REF=${{ github.ref }}
           TAG_NAME="${GITHUB_REF#refs/tags/}"
           git tag -l --format='%(contents)' "${TAG_NAME}" | tee -a ${{ github.workspace }}/RELEASE.md
+
       - name: Create Release
         id: create_release
         uses: ncipollo/release-action@v1
