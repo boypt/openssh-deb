@@ -4,7 +4,7 @@
 set -o errexit
 set -o pipefail
 set -o nounset
-# set -o xtrace
+set -o xtrace
 
 trap 'echo -e "Aborted, error $? in command: $BASH_COMMAND"; trap ERR; exit 1' ERR
 
@@ -56,8 +56,9 @@ apt install -y lsb-release && \
     fi && \
     case ${CODE_NAME} in \
         jammy|bookworm|bullseye) \
+            apt install -y gnupg && \
             echo "deb $DEBIAN_SOURCE sid main" >> /etc/apt/sources.list; \
-            KEYS=$(apt update 2>&1 | grep -o 'NO_PUBKEY [A-F0-9]\+' | sed 's/NO_PUBKEY //' | sort | uniq); \
+            KEYS=$(apt update 2>&1 | grep -o 'NO_PUBKEY [A-F0-9]\+' | sed 's/NO_PUBKEY //' | sort | uniq || true); \
             for KEY in ${KEYS}; \
             do \
                 apt-key adv --keyserver ${OPENPGP_SERVER} --recv-keys ${KEY}; \
@@ -66,8 +67,9 @@ apt install -y lsb-release && \
             apt install -y dh-sequence-movetousr debhelper; \
             ;; \
         bionic) \
+            apt install -y gnupg && \
             echo "deb $DEBIAN_SOURCE bullseye main" >> /etc/apt/sources.list; \
-            KEYS=$(apt update 2>&1 | grep -o 'NO_PUBKEY [A-F0-9]\+' | sed 's/NO_PUBKEY //' | sort | uniq); \
+            KEYS=$(apt update 2>&1 | grep -o 'NO_PUBKEY [A-F0-9]\+' | sed 's/NO_PUBKEY //' | sort | uniq || true); \
             for KEY in ${KEYS}; \
             do \
                 apt-key adv --keyserver ${OPENPGP_SERVER} --recv-keys ${KEY}; \
