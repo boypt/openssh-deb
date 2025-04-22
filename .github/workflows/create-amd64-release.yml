@@ -25,7 +25,7 @@ jobs:
 
       - name: "Compile Ubuntu 24.04 (noble) [amd64]"
         run: |
-          docker run --rm -v ${{ github.workspace }}/output:/data/output ${{ secrets.DOCKER_USERNAME }}/${{ github.event.repository.name }}:ubuntu24
+          docker run --rm -v ${{ github.workspace }}/output:/data/output ubuntu:24.04
           sudo apt install -y rename
           source ${{ github.workspace }}/version.env
           pushd ${{ github.workspace }}/output
@@ -49,7 +49,7 @@ jobs:
 
       - name: "Compile Ubuntu 22.04 (jammy) [amd64]"
         run: |
-          docker run --rm -v ${{ github.workspace }}/output:/data/output ${{ secrets.DOCKER_USERNAME }}/${{ github.event.repository.name }}:ubuntu22
+          docker run --rm -v ${{ github.workspace }}/output:/data/output ubuntu:22.04
           sudo apt install -y rename
           source ${{ github.workspace }}/version.env
           pushd ${{ github.workspace }}/output
@@ -72,7 +72,7 @@ jobs:
 
       - name: "Compile Ubuntu 20.04 (focal) [amd64]"
         run: |
-          docker run --rm -v ${{ github.workspace }}/output:/data/output ${{ secrets.DOCKER_USERNAME }}/${{ github.event.repository.name }}:ubuntu20
+          docker run --rm -v ${{ github.workspace }}/output:/data/output ubuntu:20.04
           sudo apt install -y rename
           source ${{ github.workspace }}/version.env
           pushd ${{ github.workspace }}/output
@@ -95,7 +95,7 @@ jobs:
 
       - name: "Compile Ubuntu 18.04 (bionic) [amd64]"
         run: |
-          docker run --rm -v ${{ github.workspace }}/output:/data/output ${{ secrets.DOCKER_USERNAME }}/${{ github.event.repository.name }}:ubuntu18
+          docker run --rm -v ${{ github.workspace }}/output:/data/output ubuntu:18.04
           sudo apt install -y rename
           source ${{ github.workspace }}/version.env
           pushd ${{ github.workspace }}/output
@@ -118,7 +118,7 @@ jobs:
 
       - name: "Compile Debian 13 (trixie) [amd64]"
         run: |
-          docker run --rm -v ${{ github.workspace }}/output:/data/output ${{ secrets.DOCKER_USERNAME }}/${{ github.event.repository.name }}:debian13
+          docker run --rm -v ${{ github.workspace }}/output:/data/output debian:trixie
           sudo apt install -y rename
           source ${{ github.workspace }}/version.env
           pushd ${{ github.workspace }}/output
@@ -142,7 +142,7 @@ jobs:
 
       - name: "Compile Debian 12 (bookworm) [amd64]"
         run: |
-          docker run --rm -v ${{ github.workspace }}/output:/data/output ${{ secrets.DOCKER_USERNAME }}/${{ github.event.repository.name }}:debian12
+          docker run --rm -v ${{ github.workspace }}/output:/data/output debian:bookworm
           sudo apt install -y rename
           source ${{ github.workspace }}/version.env
           pushd ${{ github.workspace }}/output
@@ -166,7 +166,7 @@ jobs:
 
       - name: "Compile Debian 11 (bullseye) [amd64]"
         run: |
-          docker run --rm -v ${{ github.workspace }}/output:/data/output ${{ secrets.DOCKER_USERNAME }}/${{ github.event.repository.name }}:debian11
+          docker run --rm -v ${{ github.workspace }}/output:/data/output debian:bullseye
           sudo apt install -y rename
           source ${{ github.workspace }}/version.env
           pushd ${{ github.workspace }}/output
