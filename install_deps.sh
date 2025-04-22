@@ -35,6 +35,12 @@ if [[ $(apt-cache search --names-only 'libfido2-dev' | wc -l) -gt 0 ]]; then
 	apt install -y libfido2-dev libcbor-dev
 fi
 
+__debhelper_ver="$(dpkg-query -f '${Version}' -W debhelper || true)"
+[[ -z $__debhelper_ver ]] && __debhelper_ver="0.0.0"
+echo "DEBUG: __debhelper_ver:$__debhelper_ver"
+dpkg --compare-versions $__debhelper_ver le '13.1~' && \
+   sudo apt install -y $__dir/builddep/*.deb
+
 # The following parameters are used for installing Debian distribution packages
 # on Ubuntu systems or old Debian systems.
 # *ONLY* used at:
@@ -42,7 +48,6 @@ fi
 # Debian series: bullseye & bookworm
 DEBIAN_SOURCE="http://ftp.debian.org/debian/"
 OPENPGP_SERVER="keyserver.ubuntu.com"
-
 
 apt install -y lsb-release && \
     CODE_NAME=$(lsb_release -sc) && \
@@ -75,8 +80,4 @@ apt install -y lsb-release && \
             ;; \
     esac
 
-__debhelper_ver="$(dpkg-query -f '${Version}' -W debhelper || true)"
-[[ -z $__debhelper_ver ]] && __debhelper_ver="0.0.0"
-echo "DEBUG: __debhelper_ver:$__debhelper_ver"
-dpkg --compare-versions $__debhelper_ver le '13.1~' && \
-   sudo apt install -y $__dir/builddep/*.deb
+exit 0
