@@ -15,9 +15,6 @@ __base="$(basename ${__file} .sh)"
 __root="$(cd "$(dirname "${__dir}")" && pwd)" # <-- change this as it depends on your app
 #
 
-__debhelper_ver="$(dpkg-query -f '${Version}' -W debhelper || true)"
-[[ -z $__debhelper_ver ]] && __debhelper_ver="0.0.0"
-
 export DEBIAN_FRONTEND=noninteractive
 
 if [[ ! -z "${APT_MIRROR+x}" ]]; then \
@@ -38,6 +35,40 @@ if [[ $(apt-cache search --names-only 'libfido2-dev' | wc -l) -gt 0 ]]; then
 	apt install -y libfido2-dev libcbor-dev
 fi
 
+
+apt install -y lsb-release && \
+    CODE_NAME=$(lsb_release -sc) && \
+    if [ ${CODE_NAME} != "focal" ]; then \
+        apt install -y dh-virtualenv; \
+    fi && \
+    case ${CODE_NAME} in \
+        jammy|bookworm|bullseye) \
+            echo "deb $DEBIAN_SOURCE sid main" >> /etc/apt/sources.list; \
+            KEYS=$(apt update 2>&1 | grep -o 'NO_PUBKEY [A-F0-9]\+' | sed 's/NO_PUBKEY //' | sort | uniq); \
+            for KEY in ${KEYS}; \
+            do \
+                apt-key adv --keyserver ${OPENPGP_SERVER} --recv-keys ${KEY}; \
+            done; \
+            apt update; \
+            apt install -y dh-sequence-movetousr debhelper; \
+            ;; \
+        bionic) \
+            echo "deb $DEBIAN_SOURCE bullseye main" >> /etc/apt/sources.list; \
+            KEYS=$(apt update 2>&1 | grep -o 'NO_PUBKEY [A-F0-9]\+' | sed 's/NO_PUBKEY //' | sort | uniq); \
+            for KEY in ${KEYS}; \
+            do \
+                apt-key adv --keyserver ${OPENPGP_SERVER} --recv-keys ${KEY}; \
+            done; \
+            apt update; \
+            apt install -y dwz dh-runit; \
+            ;; \
+        *) \
+            echo "$CODENAME is NOT NEED to add Debian sources."; \
+            ;; \
+    esac
+
+__debhelper_ver="$(dpkg-query -f '${Version}' -W debhelper || true)"
+[[ -z $__debhelper_ver ]] && __debhelper_ver="0.0.0"
+echo "DEBUG: __debhelper_ver:$__debhelper_ver"
 dpkg --compare-versions $__debhelper_ver le '13.1~' && \
    sudo apt install -y $__dir/builddep/*.deb
-
