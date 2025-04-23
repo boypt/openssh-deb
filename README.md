@@ -39,8 +39,8 @@ wget -O- https://api.github.com/repos/boypt/openssh-deb/releases/latest \
     | jq -r ".assets[] | select(.name | contains(\"${_CN}\")) | .browser_download_url" \
     | wget -i-
 
-ls *.deb
-sudo apt install -y ./*.deb
+ls *${_CN}.deb
+sudo apt install -y ./*${_CN}.deb
 ```
 
 ## Direct Build
