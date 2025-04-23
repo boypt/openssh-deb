@@ -18,13 +18,14 @@ arg1="${1:-}"
 
 source $__dir/version.env
 
-
-DOWNLOADLINKS=( $DEBMIRROR/pool/main/o/openssh/openssh_${OPENSSH_SIDPKG}.debian.tar.xz \
+DOWNLOADLINKS=( \
+		$DEBMIRROR/pool/main/o/openssh/openssh_${OPENSSH_SIDPKG}.debian.tar.xz \
 		$DEBMIRROR/pool/main/o/openssh/openssh_${OPENSSH_SIDPKG}.dsc \
 		$DEBMIRROR/pool/main/o/openssh/openssh_${OPENSSHVER}.orig.tar.gz \
 		$DEBMIRROR/pool/main/o/openssh/openssh_${OPENSSHVER}.orig.tar.gz.asc \
 	      )
 
+sudo apt update
 if ! apt-cache show libssl3; then
 	DOWNLOADLINKS+=( $OPENSSLMIR/$OPENSSLSRC )
 fi
