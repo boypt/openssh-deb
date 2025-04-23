@@ -25,6 +25,8 @@ if dpkg --compare-versions $__libssl lt '3.0.0' || [[ -n ${FORCESSL+x} ]]; then
 	STATIC_OPENSSL=1
 fi
 
+BUILD_CODENAME=$(lsb_release -sc)
+
 SOURCES=(
 	openssh_${OPENSSH_SIDPKG}.debian.tar.xz \
 	openssh_${OPENSSH_SIDPKG}.dsc \
@@ -97,9 +99,14 @@ if ! dpkg-checkbuilddeps; then
 	exit 1
 fi
 
+## Adding distro codename to package names
+sed -i "1s|)|~${BUILD_CODENAME})|" debian/changelog
+
+echo "INFO: Building Package: $(head -n1 debian/changelog)"
+
 ### Build OpenSSH Package
 env \
-	DEB_BUILD_OPTIONS=nocheck \
+	DEB_BUILD_OPTIONS="noddebs nocheck" \
 	DEB_BUILD_PROFILES=pkg.openssh.nognome \
 	dpkg-buildpackage --no-sign -rfakeroot -b
 popd
