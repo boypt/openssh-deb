@@ -20,7 +20,7 @@ Current version: (follows `debian/sid` automatically)
 - UnionTech OS Desktop 20 Home (Debian GLIBC 2.28.21-1+deepin-1) 
 - Kylin V10 SP1 (Ubuntu GLIBC 2.31-0kylin9.2k0.1)
 
-## Download and install DEBs
+## Lazy Install
 
 Github Action builds common distro DEBs.
 
@@ -31,17 +31,7 @@ If your server OS is in the supported list, you can download and install them in
 - Ubuntu `bionic(18.04)` / `focal(20.04)` / `jammy(22.04)` / `noble(24.04)` - `amd64`/`arm64`
 
 ```bash
-# make sure you have the tools
-apt install -y wget jq lsb-release
-
-_CN=$(lsb_release -sc)
-_AR=$(dpkg --print-architecture)
-wget -O- https://api.github.com/repos/boypt/openssh-deb/releases/latest \
-    | jq -r ".assets[] | select(.name | contains(\"${_CN}_${_AR}\") or contains(\"${_CN}_all\")) | .browser_download_url" \
-    | wget -i-
-
-ls *${_CN}*.deb
-sudo apt install -y ./*${_CN}*.deb
+bash -c "$(curl -L https://github.com/boypt/openssh-deb/raw/master/lazy_install.sh)"
 ```
 
 ## Direct Build
