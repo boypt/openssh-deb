@@ -109,14 +109,16 @@ fi
 ## Adding distro codename to package names
 sed -i "1s|)|~${BUILD_CODENAME})|" debian/changelog
 
+## SKIP openssh-tests pkg
+sed -i "/^%:/iBUILD_PACKAGES += -Nopenssh-tests\n" debian/rules
+
 echo "INFO: Building Package: $(head -n1 debian/changelog)"
 
 ### Build OpenSSH Package
 env \
 	DEB_BUILD_OPTIONS="noddebs nocheck" \
 	DEB_BUILD_PROFILES=pkg.openssh.nognome \
-	dpkg-buildpackage --no-sign -rfakeroot -b \
-		--rules-options="BUILD_PACKAGES=-Nopenssh-tests"
+	dpkg-buildpackage --no-sign -rfakeroot -b
 popd
 
 # Move all files into output dir
