@@ -108,7 +108,8 @@ echo "INFO: Building Package: $(head -n1 debian/changelog)"
 env \
 	DEB_BUILD_OPTIONS="noddebs nocheck" \
 	DEB_BUILD_PROFILES=pkg.openssh.nognome \
-	dpkg-buildpackage --no-sign -rfakeroot -b
+	dpkg-buildpackage --no-sign -rfakeroot -b \
+		-Nopenssh-tests
 popd
 
 # Move all files into output dir
