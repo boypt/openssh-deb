@@ -97,7 +97,7 @@ fi
 
 ## fix init-system-helpers version require
 if dpkg --compare-versions $__initsystemhelpers_ver lt '1.66'; then
-	sed -i '/init-system-helpers/s|1.66|1.52|' debian/control
+	sed -i '/init-system-helpers/s|1.66|1.50|' debian/control
 fi
 
 ## Check build deps

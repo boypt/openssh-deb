@@ -30,7 +30,7 @@ jobs:
 
       - name: "Install test with Ubuntu 24.04 (noble) [amd64]"
         run: |
-          docker run --rm -v ${{ github.workspace }}:/work -w /work  library/ubuntu:24.04 bash -c "apt update && apt install -y ./output/*.deb && ssh -V"
+          docker run --rm -v ${{ github.workspace }}:/work -w /work  library/ubuntu:24.04 bash -c "apt update && apt install -y --no-install-recommends ./output/*.deb && ssh -V"
 
       - uses: actions/upload-artifact@v4
         with:
@@ -55,7 +55,7 @@ jobs:
 
       - name: "Install test with Ubuntu (jammy) [amd64]"
         run: |
-          docker run --rm -v ${{ github.workspace }}:/work -w /work  library/ubuntu:22.04 bash -c "apt update && apt install -y ./output/*.deb && ssh -V"
+          docker run --rm -v ${{ github.workspace }}:/work -w /work  library/ubuntu:22.04 bash -c "apt update && apt install -y --no-install-recommends ./output/*.deb && ssh -V"
 
       - uses: actions/upload-artifact@v4
         with:
@@ -79,7 +79,7 @@ jobs:
 
       - name: "Install test with Ubuntu (focal) [amd64]"
         run: |
-          docker run --rm -v ${{ github.workspace }}:/work -w /work  library/ubuntu:20.04 bash -c "apt update && apt install -y ./output/*.deb && ssh -V"
+          docker run --rm -v ${{ github.workspace }}:/work -w /work  library/ubuntu:20.04 bash -c "apt update && apt install -y --no-install-recommends ./output/*.deb && ssh -V"
 
       - uses: actions/upload-artifact@v4
         with:
@@ -103,7 +103,7 @@ jobs:
 
       - name: "Install test with Ubuntu (focal) [amd64]"
         run: |
-          docker run --rm -v ${{ github.workspace }}:/work -w /work  library/ubuntu:18.04 bash -c "apt update && apt install -y ./output/*.deb && ssh -V"
+          docker run --rm -v ${{ github.workspace }}:/work -w /work  library/ubuntu:18.04 bash -c "apt update && apt install -y --no-install-recommends ./output/*.deb && ssh -V"
 
       - uses: actions/upload-artifact@v4
         with:
@@ -127,7 +127,7 @@ jobs:
 
       - name: "Install test with Debian (trixie) [amd64]"
         run: |
-          docker run --rm -v ${{ github.workspace }}:/work -w /work  library/debian:trixie bash -c "apt update && apt install -y ./output/*.deb && ssh -V"
+          docker run --rm -v ${{ github.workspace }}:/work -w /work  library/debian:trixie bash -c "apt update && apt install -y --no-install-recommends ./output/*.deb && ssh -V"
 
       - uses: actions/upload-artifact@v4
         with:
@@ -152,7 +152,7 @@ jobs:
 
       - name: "Install test with Debian (bookworm) [amd64]"
         run: |
-          docker run --rm -v ${{ github.workspace }}:/work -w /work  library/debian:bookworm bash -c "apt update && apt install -y ./output/*.deb && ssh -V"
+          docker run --rm -v ${{ github.workspace }}:/work -w /work  library/debian:bookworm bash -c "apt update && apt install -y --no-install-recommends ./output/*.deb && ssh -V"
 
       - uses: actions/upload-artifact@v4
         with:
@@ -177,7 +177,7 @@ jobs:
 
       - name: "Install test with Debian (bullseye) [amd64]"
         run: |
-          docker run --rm -v ${{ github.workspace }}:/work -w /work  library/debian:bullseye bash -c "apt update && apt install -y ./output/*.deb && ssh -V"
+          docker run --rm -v ${{ github.workspace }}:/work -w /work  library/debian:bullseye bash -c "apt update && apt install -y --no-install-recommends ./output/*.deb && ssh -V"
 
       - uses: actions/upload-artifact@v4
         with:
