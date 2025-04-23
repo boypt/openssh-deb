@@ -25,7 +25,8 @@ DOWNLOADLINKS=( $DEBMIRROR/pool/main/o/openssh/openssh_${OPENSSH_SIDPKG}.debian.
 		$DEBMIRROR/pool/main/o/openssh/openssh_${OPENSSHVER}.orig.tar.gz.asc \
 	      )
 
-if ! dpkg --status libssl3; then
+apt update
+if ! apt-cache show libssl3; then
 	DOWNLOADLINKS+=( $OPENSSLMIR/$OPENSSLSRC )
 fi
 
