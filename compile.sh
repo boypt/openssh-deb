@@ -116,7 +116,7 @@ env \
 	DEB_BUILD_OPTIONS="noddebs nocheck" \
 	DEB_BUILD_PROFILES=pkg.openssh.nognome \
 	dpkg-buildpackage --no-sign -rfakeroot -b \
-		-Nopenssh-tests
+		--rules-options="BUILD_PACKAGES=-Nopenssh-tests"
 popd
 
 # Move all files into output dir
