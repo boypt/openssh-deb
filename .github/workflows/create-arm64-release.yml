@@ -25,20 +25,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
       - name: "Compile Ubuntu 24.04 (noble) [arm64]"
         run: |
           ./pullsrc.sh
-          docker run --rm -v ${{ github.workspace }}:/work -w /work  library/ubuntu:24.04 bash -c "./install_deps.sh && ./compile.sh"
-          sudo apt install -y rename
+          docker run --rm -v ${{ github.workspace }}:/work -w /work library/arm64v8/ubuntu:24.04 bash -c "./install_deps.sh && ./compile.sh"
           source ${{ github.workspace }}/version.env
           pushd ${{ github.workspace }}/output
-          sudo rename "s/$OPENSSH_SIDPKG/$OPENSSH_SIDPKG-noble/" *.deb
+          sudo rename.ul $OPENSSH_SIDPKG ${OPENSSH_SIDPKG}-noble *.deb
           popd
       - uses: actions/upload-artifact@v4
         with:
@@ -56,20 +52,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
       - name: "Compile Ubuntu 22.04 (jammy) [arm64]"
         run: |
           ./pullsrc.sh
-          docker run --rm -v ${{ github.workspace }}:/work -w /work  library/ubuntu:22.04 bash -c "./install_deps.sh && ./compile.sh"
-          sudo apt install -y rename
+          docker run --rm -v ${{ github.workspace }}:/work -w /work  library/arm64v8/ubuntu:22.04 bash -c "./install_deps.sh && ./compile.sh"
           source ${{ github.workspace }}/version.env
           pushd ${{ github.workspace }}/output
-          sudo rename "s/$OPENSSH_SIDPKG/$OPENSSH_SIDPKG-jammy/" *.deb
+          sudo rename.ul $OPENSSH_SIDPKG ${OPENSSH_SIDPKG}-jammy *.deb
           popd
       - uses: actions/upload-artifact@v4
         with:
@@ -86,20 +78,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
       - name: "Compile Ubuntu 20.04 (focal) [arm64]"
         run: |
           ./pullsrc.sh
-          docker run --rm -v ${{ github.workspace }}:/work -w /work  library/ubuntu:20.04 bash -c "./install_deps.sh && ./compile.sh"
-          sudo apt install -y rename
+          docker run --rm -v ${{ github.workspace }}:/work -w /work  library/arm64v8/ubuntu:20.04 bash -c "./install_deps.sh && ./compile.sh"
           source ${{ github.workspace }}/version.env
           pushd ${{ github.workspace }}/output
-          sudo rename "s/$OPENSSH_SIDPKG/$OPENSSH_SIDPKG-focal/" *.deb
+          sudo rename.ul $OPENSSH_SIDPKG ${OPENSSH_SIDPKG}-focal *.deb
           popd
       - uses: actions/upload-artifact@v4
         with:
@@ -116,20 +104,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
       - name: "Compile Ubuntu 18.04 (bionic) [arm64]"
         run: |
           ./pullsrc.sh
-          docker run --rm -v ${{ github.workspace }}:/work -w /work  library/ubuntu:18.04 bash -c "./install_deps.sh && ./compile.sh"
-          sudo apt install -y rename
+          docker run --rm -v ${{ github.workspace }}:/work -w /work  library/arm64v8/ubuntu:18.04 bash -c "./install_deps.sh && ./compile.sh"
           source ${{ github.workspace }}/version.env
           pushd ${{ github.workspace }}/output
-          sudo rename "s/$OPENSSH_SIDPKG/$OPENSSH_SIDPKG-bionic/" *.deb
+          sudo rename.ul $OPENSSH_SIDPKG ${OPENSSH_SIDPKG}-bionic *.deb
           popd
       - uses: actions/upload-artifact@v4
         with:
@@ -146,20 +130,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
       - name: "Compile Debian 13 (trixie) [arm64]"
         run: |
           ./pullsrc.sh
-          docker run --rm -v ${{ github.workspace }}:/work -w /work  library/debian:trixie bash -c "./install_deps.sh && ./compile.sh"
-          sudo apt install -y rename
+          docker run --rm -v ${{ github.workspace }}:/work -w /work  library/arm64v8/debian:trixie bash -c "./install_deps.sh && ./compile.sh"
           source ${{ github.workspace }}/version.env
           pushd ${{ github.workspace }}/output
-          sudo rename "s/$OPENSSH_SIDPKG/$OPENSSH_SIDPKG-trixie/" *.deb
+          sudo rename.ul $OPENSSH_SIDPKG ${OPENSSH_SIDPKG}-trixie *.deb
           popd
       - uses: actions/upload-artifact@v4
         with:
@@ -177,20 +157,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
       - name: "Compile Debian 12 (bookworm) [arm64]"
         run: |
           ./pullsrc.sh
-          docker run --rm -v ${{ github.workspace }}:/work -w /work  library/debian:bookworm bash -c "./install_deps.sh && ./compile.sh"
-          sudo apt install -y rename
+          docker run --rm -v ${{ github.workspace }}:/work -w /work  library/arm64v8/debian:bookworm bash -c "./install_deps.sh && ./compile.sh"
           source ${{ github.workspace }}/version.env
           pushd ${{ github.workspace }}/output
-          sudo rename "s/$OPENSSH_SIDPKG/$OPENSSH_SIDPKG-bookworm/" *.deb
+          sudo rename.ul $OPENSSH_SIDPKG ${OPENSSH_SIDPKG}-bookworm *.deb
           popd
       - uses: actions/upload-artifact@v4
         with:
@@ -208,20 +184,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
       - name: "Compile Debian 11 (bullseye) [arm64]"
         run: |
           ./pullsrc.sh
-          docker run --rm -v ${{ github.workspace }}:/work -w /work  library/debian:bullseye bash -c "./install_deps.sh && ./compile.sh"
-          sudo apt install -y rename
+          docker run --rm -v ${{ github.workspace }}:/work -w /work  library/arm64v8/debian:bullseye bash -c "./install_deps.sh && ./compile.sh"
           source ${{ github.workspace }}/version.env
           pushd ${{ github.workspace }}/output
-          sudo rename "s/$OPENSSH_SIDPKG/$OPENSSH_SIDPKG-bullseye/" *.deb
+          sudo rename.ul $OPENSSH_SIDPKG ${OPENSSH_SIDPKG}-bullseye *.deb
           popd
       - uses: actions/upload-artifact@v4
         with:

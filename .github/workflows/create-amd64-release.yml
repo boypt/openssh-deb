@@ -27,10 +27,9 @@ jobs:
         run: |
           ./pullsrc.sh
           docker run --rm -v ${{ github.workspace }}:/work -w /work  library/ubuntu:24.04 bash -c "./install_deps.sh && ./compile.sh"
-          sudo apt install -y rename
           source ${{ github.workspace }}/version.env
           pushd ${{ github.workspace }}/output
-          sudo rename "s/$OPENSSH_SIDPKG/$OPENSSH_SIDPKG-noble/" *.deb
+          sudo rename.ul $OPENSSH_SIDPKG ${OPENSSH_SIDPKG}-noble *.deb
           popd
       - uses: actions/upload-artifact@v4
         with:
@@ -52,10 +51,9 @@ jobs:
         run: |
           ./pullsrc.sh
           docker run --rm -v ${{ github.workspace }}:/work -w /work  library/ubuntu:22.04 bash -c "./install_deps.sh && ./compile.sh"
-          sudo apt install -y rename
           source ${{ github.workspace }}/version.env
           pushd ${{ github.workspace }}/output
-          sudo rename "s/$OPENSSH_SIDPKG/$OPENSSH_SIDPKG-jammy/" *.deb
+          sudo rename.ul $OPENSSH_SIDPKG ${OPENSSH_SIDPKG}-jammy *.deb
           popd
       - uses: actions/upload-artifact@v4
         with:
@@ -76,10 +74,9 @@ jobs:
         run: |
           ./pullsrc.sh
           docker run --rm -v ${{ github.workspace }}:/work -w /work  library/ubuntu:20.04 bash -c "./install_deps.sh && ./compile.sh"
-          sudo apt install -y rename
           source ${{ github.workspace }}/version.env
           pushd ${{ github.workspace }}/output
-          sudo rename "s/$OPENSSH_SIDPKG/$OPENSSH_SIDPKG-focal/" *.deb
+          sudo rename.ul $OPENSSH_SIDPKG ${OPENSSH_SIDPKG}-focal *.deb
           popd
       - uses: actions/upload-artifact@v4
         with:
@@ -100,10 +97,9 @@ jobs:
         run: |
           ./pullsrc.sh
           docker run --rm -v ${{ github.workspace }}:/work -w /work  library/ubuntu:18.04 bash -c "./install_deps.sh && ./compile.sh"
-          sudo apt install -y rename
           source ${{ github.workspace }}/version.env
           pushd ${{ github.workspace }}/output
-          sudo rename "s/$OPENSSH_SIDPKG/$OPENSSH_SIDPKG-bionic/" *.deb
+          sudo rename.ul $OPENSSH_SIDPKG ${OPENSSH_SIDPKG}-bionic *.deb
           popd
       - uses: actions/upload-artifact@v4
         with:
@@ -124,10 +120,9 @@ jobs:
         run: |
           ./pullsrc.sh
           docker run --rm -v ${{ github.workspace }}:/work -w /work  library/debian:trixie bash -c "./install_deps.sh && ./compile.sh"
-          sudo apt install -y rename
           source ${{ github.workspace }}/version.env
           pushd ${{ github.workspace }}/output
-          sudo rename "s/$OPENSSH_SIDPKG/$OPENSSH_SIDPKG-trixie/" *.deb
+          sudo rename.ul $OPENSSH_SIDPKG ${OPENSSH_SIDPKG}-trixie *.deb
           popd
       - uses: actions/upload-artifact@v4
         with:
@@ -149,10 +144,9 @@ jobs:
         run: |
           ./pullsrc.sh
           docker run --rm -v ${{ github.workspace }}:/work -w /work  library/debian:bookworm bash -c "./install_deps.sh && ./compile.sh"
-          sudo apt install -y rename
           source ${{ github.workspace }}/version.env
           pushd ${{ github.workspace }}/output
-          sudo rename "s/$OPENSSH_SIDPKG/$OPENSSH_SIDPKG-bookworm/" *.deb
+          sudo rename.ul $OPENSSH_SIDPKG ${OPENSSH_SIDPKG}-bookworm *.deb
           popd
       - uses: actions/upload-artifact@v4
         with:
@@ -174,10 +168,9 @@ jobs:
         run: |
           ./pullsrc.sh
           docker run --rm -v ${{ github.workspace }}:/work -w /work  library/debian:bullseye bash -c "./install_deps.sh && ./compile.sh"
-          sudo apt install -y rename
           source ${{ github.workspace }}/version.env
           pushd ${{ github.workspace }}/output
-          sudo rename "s/$OPENSSH_SIDPKG/$OPENSSH_SIDPKG-bullseye/" *.deb
+          sudo rename.ul $OPENSSH_SIDPKG ${OPENSSH_SIDPKG}-bullseye *.deb
           popd
       - uses: actions/upload-artifact@v4
         with:
