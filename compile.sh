@@ -18,6 +18,8 @@ __libssl="$(dpkg-query -f '${Version}' -W libssl-dev || true)"
 [[ -z $__libssl ]] && __libssl="0.0.0"
 __libfido2_ver="$(dpkg-query -f '${Version}' -W libfido2-dev || true)"
 [[ -z $__libfido2_ver ]] && __libfido2_ver="0.0.0"
+__initsystemhelpers_ver="$(dpkg-query -f '${Version}' -W init-system-helpers || true)"
+[[ -z $__initsystemhelpers_ver ]] && __initsystemhelpers_ver="0.0.0"
 
 source $__dir/version.env
 STATIC_OPENSSL=0
@@ -91,6 +93,11 @@ fi
 if ! dpkg -l libwtmpdb-dev; then
 	sed -i '/libwtmpdb-dev/d' debian/control
 	sed -i '/with-wtmpdb/d' debian/rules
+fi
+
+## fix init-system-helpers version require
+if dpkg --compare-versions $__initsystemhelpers_ver lt '1.66'; then
+	sed -i '/init-system-helpers/s|init-system-helpers (>= 1.66~)|init-system-helpers (>= 1.52~)|' debian/openssh-client/DEBIAN/control
 fi
 
 ## Check build deps
