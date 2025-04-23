@@ -15,10 +15,33 @@ Current version: (follows `debian/sid` automatically)
 
 ### Supported (tested) Distro:
 
-- Ubuntu 24.04/22.04/20.04
+- Ubuntu 24.04/22.04/20.04/18.04
 - Debian 13/trixie 12/bookworm 11/bullseye
 - UnionTech OS Desktop 20 Home (Debian GLIBC 2.28.21-1+deepin-1) 
 - Kylin V10 SP1 (Ubuntu GLIBC 2.31-0kylin9.2k0.1)
+
+## Download and install DEBs
+
+Github Action builds common distro DEBs.
+
+If your server OS is in the supported list, you can download and install them in the server.
+
+### Release supported OSs
+- Debian `bullseye(11)` / `bookworm(12)` / `trixie(13)` - `amd64`/`arm64`
+- Ubuntu `bionic(18.04)` / `focal(20.04)` / `jammy(22.04)` / `noble(24.04)` - `amd64`/`arm64`
+
+```bash
+# make sure you have the tools
+apt install -y wget jq lsb-release
+
+_CN=$(lsb_release -sc)_$(dpkg --print-architecture)
+wget -O- https://api.github.com/repos/boypt/openssh-deb/releases/latest \
+    | jq -r ".assets[] | select(.name | contains(\"${_CN}\")) | .browser_download_url" \
+    | wget -i-
+
+ls *.deb
+sudo apt install -y ./*.deb
+```
 
 ## Direct Build
 
@@ -71,10 +94,7 @@ Generated DEBs are right under the `output` directory. (both direct build and do
 
 ```bash
 ls -l output/*.deb
-
-# Ignore dbgsym and tests
-find output -maxdepth 1 ! -name '*dbgsym*' ! -name '*tests*' -name '*.deb' | xargs \
-    sudo apt install -y
+sudo apt install -y output/*.deb
 ```
 
 ## NOTES
