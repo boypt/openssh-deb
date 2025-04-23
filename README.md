@@ -48,6 +48,23 @@ docker run --rm -v "$(pwd):/work" -w /work ubuntu:20.04 bash -c "./install_deps.
 docker builder prune
 ```
 
+<details>
+
+<summary>Using a APT mirror or proxy inside docker</summary>
+
+using `-e` to set environment variables inside docker.
+
+```bash
+    docker run --rm -v "$(pwd):/work" -w /work \
+        -e APT_MIRROR=mirrors.ustc.edu.cn \
+        -e http_proxy=http://x.x.x.x \
+        -e https_proxy=http://x.x.x.x \
+        ubuntu:20.04 bash -c "./install_deps.sh && ./compile.sh"
+```
+
+</details>
+
+
 ## Install DEBs
 
 Generated DEBs are right under the `output` directory. (both direct build and docker build).
