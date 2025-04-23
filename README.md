@@ -37,7 +37,7 @@ apt install -y wget jq lsb-release
 _CN=$(lsb_release -sc)
 _AR=$(dpkg --print-architecture)
 wget -O- https://api.github.com/repos/boypt/openssh-deb/releases/latest \
-    | jq -r ".assets[] | select(.name | contains(\"${_CN}_${_AR}\")) or contains(\"${_CN}_all\")) | .browser_download_url" \
+    | jq -r ".assets[] | select(.name | contains(\"${_CN}_${_AR}\") or contains(\"${_CN}_all\")) | .browser_download_url" \
     | wget -i-
 
 ls *${_CN}*.deb
