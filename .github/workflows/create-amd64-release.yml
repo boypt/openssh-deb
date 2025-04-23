@@ -27,10 +27,6 @@ jobs:
         run: |
           ./pullsrc.sh
           docker run --rm -v ${{ github.workspace }}:/work -w /work  library/ubuntu:24.04 bash -c "./install_deps.sh && ./compile.sh"
-          source ${{ github.workspace }}/version.env
-          pushd ${{ github.workspace }}/output
-          sudo rename.ul $OPENSSH_SIDPKG ${OPENSSH_SIDPKG}-noble *.deb
-          popd
       - uses: actions/upload-artifact@v4
         with:
           name: ubuntu24-amd64
@@ -51,10 +47,6 @@ jobs:
         run: |
           ./pullsrc.sh
           docker run --rm -v ${{ github.workspace }}:/work -w /work  library/ubuntu:22.04 bash -c "./install_deps.sh && ./compile.sh"
-          source ${{ github.workspace }}/version.env
-          pushd ${{ github.workspace }}/output
-          sudo rename.ul $OPENSSH_SIDPKG ${OPENSSH_SIDPKG}-jammy *.deb
-          popd
       - uses: actions/upload-artifact@v4
         with:
           name: ubuntu22-amd64
@@ -74,10 +66,6 @@ jobs:
         run: |
           ./pullsrc.sh
           docker run --rm -v ${{ github.workspace }}:/work -w /work  library/ubuntu:20.04 bash -c "./install_deps.sh && ./compile.sh"
-          source ${{ github.workspace }}/version.env
-          pushd ${{ github.workspace }}/output
-          sudo rename.ul $OPENSSH_SIDPKG ${OPENSSH_SIDPKG}-focal *.deb
-          popd
       - uses: actions/upload-artifact@v4
         with:
           name: ubuntu20-amd64
@@ -97,10 +85,6 @@ jobs:
         run: |
           ./pullsrc.sh
           docker run --rm -v ${{ github.workspace }}:/work -w /work  library/ubuntu:18.04 bash -c "./install_deps.sh && ./compile.sh"
-          source ${{ github.workspace }}/version.env
-          pushd ${{ github.workspace }}/output
-          sudo rename.ul $OPENSSH_SIDPKG ${OPENSSH_SIDPKG}-bionic *.deb
-          popd
       - uses: actions/upload-artifact@v4
         with:
           name: ubuntu18-amd64
@@ -120,10 +104,6 @@ jobs:
         run: |
           ./pullsrc.sh
           docker run --rm -v ${{ github.workspace }}:/work -w /work  library/debian:trixie bash -c "./install_deps.sh && ./compile.sh"
-          source ${{ github.workspace }}/version.env
-          pushd ${{ github.workspace }}/output
-          sudo rename.ul $OPENSSH_SIDPKG ${OPENSSH_SIDPKG}-trixie *.deb
-          popd
       - uses: actions/upload-artifact@v4
         with:
           name: debian13-amd64
@@ -144,10 +124,6 @@ jobs:
         run: |
           ./pullsrc.sh
           docker run --rm -v ${{ github.workspace }}:/work -w /work  library/debian:bookworm bash -c "./install_deps.sh && ./compile.sh"
-          source ${{ github.workspace }}/version.env
-          pushd ${{ github.workspace }}/output
-          sudo rename.ul $OPENSSH_SIDPKG ${OPENSSH_SIDPKG}-bookworm *.deb
-          popd
       - uses: actions/upload-artifact@v4
         with:
           name: debian12-amd64
@@ -168,10 +144,6 @@ jobs:
         run: |
           ./pullsrc.sh
           docker run --rm -v ${{ github.workspace }}:/work -w /work  library/debian:bullseye bash -c "./install_deps.sh && ./compile.sh"
-          source ${{ github.workspace }}/version.env
-          pushd ${{ github.workspace }}/output
-          sudo rename.ul $OPENSSH_SIDPKG ${OPENSSH_SIDPKG}-bullseye *.deb
-          popd
       - uses: actions/upload-artifact@v4
         with:
           name: debian11-amd64
@@ -224,10 +196,6 @@ jobs:
         with:
           name: debian11-amd64
           path: ./output
-
-      - name: Remove dbgsym packages
-        run: |
-          rm -fv ${{ github.workspace }}/output/*dbgsym*
 
       - name: Get tag message
         run: |
