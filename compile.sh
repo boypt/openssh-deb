@@ -97,7 +97,7 @@ fi
 
 ## fix init-system-helpers version require
 if dpkg --compare-versions $__initsystemhelpers_ver lt '1.66'; then
-	sed -i '/init-system-helpers/s|init-system-helpers (>= 1.66~)|init-system-helpers (>= 1.52~)|' debian/openssh-client/DEBIAN/control
+	sed -i '/init-system-helpers/s|1.66|1.52|' debian/control
 fi
 
 ## Check build deps
