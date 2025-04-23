@@ -26,7 +26,7 @@ if [[ ! -z "${APT_MIRROR+x}" ]]; then \
 fi
 
 apt update && apt upgrade -y
-apt install -y --no-install-recommends wget sudo pkgconf build-essential fakeroot \
+apt install -y --no-install-recommends lsb-release wget sudo pkgconf build-essential fakeroot \
 	dpkg-dev debhelper debhelper-compat dh-exec dh-runit \
 	libaudit-dev libedit-dev libgtk-3-dev libselinux1-dev libsystemd-dev \
 	libkrb5-dev libpam0g-dev libwrap0-dev
@@ -43,8 +43,7 @@ fi
 DEBIAN_SOURCE="http://ftp.debian.org/debian/"
 OPENPGP_SERVER="keyserver.ubuntu.com"
 
-apt install -y lsb-release && \
-    CODE_NAME=$(lsb_release -sc) && \
+CODE_NAME=$(lsb_release -sc) && \
     if [ ${CODE_NAME} != "focal" ]; then \
         apt install -y dh-virtualenv; \
     fi && \
