@@ -27,6 +27,11 @@ jobs:
         run: |
           ./pullsrc.sh
           docker run --rm -v ${{ github.workspace }}:/work -w /work  library/ubuntu:24.04 bash -c "./install_deps.sh && ./compile.sh"
+
+      - name: "Install test with Ubuntu 24.04 (noble) [arm64]"
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/work -w /work  library/ubuntu:24.04 bash -c "apt update && apt install -y ./output/*.deb && ssh -V"
+
       - uses: actions/upload-artifact@v4
         with:
           name: ubuntu24-arm64
@@ -47,6 +52,11 @@ jobs:
         run: |
           ./pullsrc.sh
           docker run --rm -v ${{ github.workspace }}:/work -w /work  library/ubuntu:22.04 bash -c "./install_deps.sh && ./compile.sh"
+
+      - name: "Install test with Ubuntu (jammy) [arm64]"
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/work -w /work  library/ubuntu:22.04 bash -c "apt update && apt install -y ./output/*.deb && ssh -V"
+
       - uses: actions/upload-artifact@v4
         with:
           name: ubuntu22-arm64
@@ -66,6 +76,11 @@ jobs:
         run: |
           ./pullsrc.sh
           docker run --rm -v ${{ github.workspace }}:/work -w /work  library/ubuntu:20.04 bash -c "./install_deps.sh && ./compile.sh"
+
+      - name: "Install test with Ubuntu (focal) [arm64]"
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/work -w /work  library/ubuntu:20.04 bash -c "apt update && apt install -y ./output/*.deb && ssh -V"
+
       - uses: actions/upload-artifact@v4
         with:
           name: ubuntu20-arm64
@@ -85,6 +100,11 @@ jobs:
         run: |
           ./pullsrc.sh
           docker run --rm -v ${{ github.workspace }}:/work -w /work  library/ubuntu:18.04 bash -c "./install_deps.sh && ./compile.sh"
+
+      - name: "Install test with Ubuntu (focal) [arm64]"
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/work -w /work  library/ubuntu:18.04 bash -c "apt update && apt install -y ./output/*.deb && ssh -V"
+
       - uses: actions/upload-artifact@v4
         with:
           name: ubuntu18-arm64
@@ -104,6 +124,11 @@ jobs:
         run: |
           ./pullsrc.sh
           docker run --rm -v ${{ github.workspace }}:/work -w /work  library/debian:trixie bash -c "./install_deps.sh && ./compile.sh"
+
+      - name: "Install test with Debian (trixie) [arm64]"
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/work -w /work  library/debian:trixie bash -c "apt update && apt install -y ./output/*.deb && ssh -V"
+
       - uses: actions/upload-artifact@v4
         with:
           name: debian13-arm64
@@ -124,6 +149,11 @@ jobs:
         run: |
           ./pullsrc.sh
           docker run --rm -v ${{ github.workspace }}:/work -w /work  library/debian:bookworm bash -c "./install_deps.sh && ./compile.sh"
+
+      - name: "Install test with Debian (bookworm) [arm64]"
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/work -w /work  library/debian:bookworm bash -c "apt update && apt install -y ./output/*.deb && ssh -V"
+
       - uses: actions/upload-artifact@v4
         with:
           name: debian12-arm64
@@ -144,6 +174,11 @@ jobs:
         run: |
           ./pullsrc.sh
           docker run --rm -v ${{ github.workspace }}:/work -w /work  library/debian:bullseye bash -c "./install_deps.sh && ./compile.sh"
+
+      - name: "Install test with Debian (bullseye) [arm64]"
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/work -w /work  library/debian:bullseye bash -c "apt update && apt install -y ./output/*.deb && ssh -V"
+
       - uses: actions/upload-artifact@v4
         with:
           name: debian11-arm64
