@@ -18,17 +18,16 @@ arg1="${1:-}"
 
 source $__dir/version.env
 
-
-DOWNLOADLINKS=( $DEBMIRROR/pool/main/o/openssh/openssh_${OPENSSH_SIDPKG}.debian.tar.xz \
+DOWNLOADLINKS=( \
+		$DEBMIRROR/pool/main/o/openssh/openssh_${OPENSSH_SIDPKG}.debian.tar.xz \
 		$DEBMIRROR/pool/main/o/openssh/openssh_${OPENSSH_SIDPKG}.dsc \
 		$DEBMIRROR/pool/main/o/openssh/openssh_${OPENSSHVER}.orig.tar.gz \
 		$DEBMIRROR/pool/main/o/openssh/openssh_${OPENSSHVER}.orig.tar.gz.asc \
+		${OPENSSLMIR}/${OPENSSLSRC}
 	      )
 
-if ! dpkg --status libssl3; then
-	DOWNLOADLINKS+=( $OPENSSLMIR/$OPENSSLSRC )
-fi
-
 mkdir -p $__dir/downloads && cd $__dir/downloads
+echo "> INFO: downloading the following sources."
+echo "${DOWNLOADLINKS[@]}" | tr " " "\n"
 wget --continue "${DOWNLOADLINKS[@]}"
 
