@@ -31,7 +31,7 @@ jobs:
       - name: "Compile Ubuntu 24.04 (noble) [arm64]"
         run: |
           ./pullsrc.sh
-          docker run --rm -v ${{ github.workspace }}:/work -w /work arm64v8/ubuntu:24.04 bash -c "./install_deps.sh && ./compile.sh"
+          docker run --platform=linux/arm64 --rm -v ${{ github.workspace }}:/work -w /work arm64v8/ubuntu:24.04 bash -c "./install_deps.sh && ./compile.sh"
           source ${{ github.workspace }}/version.env
           pushd ${{ github.workspace }}/output
           sudo rename.ul $OPENSSH_SIDPKG ${OPENSSH_SIDPKG}-noble *.deb
@@ -58,7 +58,7 @@ jobs:
       - name: "Compile Ubuntu 22.04 (jammy) [arm64]"
         run: |
           ./pullsrc.sh
-          docker run --rm -v ${{ github.workspace }}:/work -w /work  arm64v8/ubuntu:22.04 bash -c "./install_deps.sh && ./compile.sh"
+          docker run --platform=linux/arm64 --rm -v ${{ github.workspace }}:/work -w /work  arm64v8/ubuntu:22.04 bash -c "./install_deps.sh && ./compile.sh"
           source ${{ github.workspace }}/version.env
           pushd ${{ github.workspace }}/output
           sudo rename.ul $OPENSSH_SIDPKG ${OPENSSH_SIDPKG}-jammy *.deb
@@ -84,7 +84,7 @@ jobs:
       - name: "Compile Ubuntu 20.04 (focal) [arm64]"
         run: |
           ./pullsrc.sh
-          docker run --rm -v ${{ github.workspace }}:/work -w /work  arm64v8/ubuntu:20.04 bash -c "./install_deps.sh && ./compile.sh"
+          docker run --platform=linux/arm64 --rm -v ${{ github.workspace }}:/work -w /work  arm64v8/ubuntu:20.04 bash -c "./install_deps.sh && ./compile.sh"
           source ${{ github.workspace }}/version.env
           pushd ${{ github.workspace }}/output
           sudo rename.ul $OPENSSH_SIDPKG ${OPENSSH_SIDPKG}-focal *.deb
@@ -110,7 +110,7 @@ jobs:
       - name: "Compile Ubuntu 18.04 (bionic) [arm64]"
         run: |
           ./pullsrc.sh
-          docker run --rm -v ${{ github.workspace }}:/work -w /work  arm64v8/ubuntu:18.04 bash -c "./install_deps.sh && ./compile.sh"
+          docker run --platform=linux/arm64 --rm -v ${{ github.workspace }}:/work -w /work  arm64v8/ubuntu:18.04 bash -c "./install_deps.sh && ./compile.sh"
           source ${{ github.workspace }}/version.env
           pushd ${{ github.workspace }}/output
           sudo rename.ul $OPENSSH_SIDPKG ${OPENSSH_SIDPKG}-bionic *.deb
@@ -136,7 +136,7 @@ jobs:
       - name: "Compile Debian 13 (trixie) [arm64]"
         run: |
           ./pullsrc.sh
-          docker run --rm -v ${{ github.workspace }}:/work -w /work  arm64v8/debian:trixie bash -c "./install_deps.sh && ./compile.sh"
+          docker run --platform=linux/arm64 --rm -v ${{ github.workspace }}:/work -w /work  arm64v8/debian:trixie bash -c "./install_deps.sh && ./compile.sh"
           source ${{ github.workspace }}/version.env
           pushd ${{ github.workspace }}/output
           sudo rename.ul $OPENSSH_SIDPKG ${OPENSSH_SIDPKG}-trixie *.deb
@@ -163,7 +163,7 @@ jobs:
       - name: "Compile Debian 12 (bookworm) [arm64]"
         run: |
           ./pullsrc.sh
-          docker run --rm -v ${{ github.workspace }}:/work -w /work  arm64v8/debian:bookworm bash -c "./install_deps.sh && ./compile.sh"
+          docker run --platform=linux/arm64 --rm -v ${{ github.workspace }}:/work -w /work  arm64v8/debian:bookworm bash -c "./install_deps.sh && ./compile.sh"
           source ${{ github.workspace }}/version.env
           pushd ${{ github.workspace }}/output
           sudo rename.ul $OPENSSH_SIDPKG ${OPENSSH_SIDPKG}-bookworm *.deb
@@ -190,7 +190,7 @@ jobs:
       - name: "Compile Debian 11 (bullseye) [arm64]"
         run: |
           ./pullsrc.sh
-          docker run --rm -v ${{ github.workspace }}:/work -w /work  arm64v8/debian:bullseye bash -c "./install_deps.sh && ./compile.sh"
+          docker run --platform=linux/arm64 --rm -v ${{ github.workspace }}:/work -w /work  arm64v8/debian:bullseye bash -c "./install_deps.sh && ./compile.sh"
           source ${{ github.workspace }}/version.env
           pushd ${{ github.workspace }}/output
           sudo rename.ul $OPENSSH_SIDPKG ${OPENSSH_SIDPKG}-bullseye *.deb
