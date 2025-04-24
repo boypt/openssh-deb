@@ -17,9 +17,10 @@ __root="$(cd "$(dirname "${__dir}")" && pwd)" # <-- change this as it depends on
 
 export DEBIAN_FRONTEND=noninteractive
 
-if [[ ! -z "${APT_MIRROR+x}" ]]; then \
+if [[ -n "${APT_MIRROR+x}" ]]; then \
 	[[ -f /etc/apt/sources.list ]] && \
-		sed -i "s|$(awk '/^deb/{print $2}' /etc/apt/sources.list | head -n1 | cut -d/ -f3)|${APT_MIRROR}|" /etc/apt/sources.list
+		sed -i "s|$(awk '/^deb/{print $2}' /etc/apt/sources.list | head -n1 | cut -d/ -f3)|${APT_MIRROR}|" /etc/apt/sources.list && \
+		sed -i "/security.ubuntu.com/s|^|#|" /etc/apt/sources.list 
 
 	[[ -f /etc/apt/sources.list.d/debian.sources ]] && \
 		sed -i "s|deb.debian.org|${APT_MIRROR}|" /etc/apt/sources.list.d/debian.sources
@@ -42,6 +43,9 @@ fi
 # Debian series: bullseye & bookworm
 DEBIAN_SOURCE="http://ftp.debian.org/debian/"
 OPENPGP_SERVER="keyserver.ubuntu.com"
+
+[[ -n "${APT_MIRROR+x}" ]] && DEBIAN_SOURCE="http://${APT_MIRROR}/debian/"
+[[ -n "${PGP_SERVER+x}" ]] && OPENPGP_SERVER="${PGP_SERVER}"
 
 CODE_NAME=$(lsb_release -sc) && \
     if [ ${CODE_NAME} != "focal" ]; then \
