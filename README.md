@@ -31,7 +31,7 @@ If your server OS is in the supported list, you can download and install them in
 - Ubuntu  `focal(20.04)` / `jammy(22.04)` / `noble(24.04)` - `amd64`/`arm64`
 
 ```bash
-bash -c "$(curl -L https://github.com/boypt/openssh-deb/raw/master/lazy_install.sh)"
+sudo bash -c "$(curl -L https://github.com/boypt/openssh-deb/raw/master/lazy_install.sh)"
 ```
 
 ## Direct Build
