@@ -93,8 +93,9 @@ sudo apt install -y output/*.deb
 ### Restore distro default version
 
 ```bash
-V=$(apt-cache madison ssh | head -n1 | awk '{print $3}')
-sudo apt install --allow-downgrades -y ssh=$V openssh-client=$V openssh-server=$V openssh-sftp-server=$V
+V=$(apt-cache madison ssh | awk 'NR==1 {print $3}')
+sudo apt install --allow-downgrades -y \
+    ssh=$V openssh-client=$V openssh-server=$V openssh-sftp-server=$V
 ```
 
 ### Known issues 
