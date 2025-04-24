@@ -1,0 +1,81 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Create amd64 release
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    tags: [ "v*" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm]
+        include:
+          - distro: ubuntu
+            version: noble
+          - distro: ubuntu
+            version: jammy
+          - distro: ubuntu
+            version: focal
+          - distro: debian
+            version: trixie
+          - distro: debian
+            version: bookworm
+          - distro: debian
+            version: bullseye
+      fail-fast: false
+
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: "Compile ${{ matrix.distro }} ${{ matrix.version }} (${{ matrix.version }}) [amd64]"
+        run: |
+          ./pullsrc.sh
+          docker run --rm -v ${{ github.workspace }}:/work -w /work library/${{ matrix.distro }}:${{ matrix.version }} bash -c "./install_deps.sh && ./compile.sh"
+
+      - name: "Install test with ${{ matrix.distro }} (${{ matrix.version }}) [amd64]"
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/work -w /work library/${{ matrix.distro }}:${{ matrix.version }} bash -c "apt update && apt install -y --no-install-recommends ./output/*.deb && ssh -V"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.distro }}${{ matrix.version }}-amd64
+          path: ${{ github.workspace }}/output
+
+  create_release:
+    if: ${{ github.ref == 'refs/heads/master' }}
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./output
+
+      - name: Get tag message
+        run: |
+          echo -e "> Automated release created by GitHub Actions.\n" > ${{ github.workspace }}/RELEASE.md
+          GITHUB_REF=${{ github.ref }}
+          TAG_NAME="${GITHUB_REF#refs/tags/}"
+          git tag -l --format='%(contents)' "${TAG_NAME}" | tee -a ${{ github.workspace }}/RELEASE.md
+
+      - name: Create Release
+        id: create_release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "${{ github.workspace }}/output/*"
+          bodyFile: ${{ github.workspace }}/RELEASE.md
+          token: ${{ secrets.GITHUB_TOKEN }}
+          allowUpdates: true
