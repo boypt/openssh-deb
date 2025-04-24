@@ -35,9 +35,13 @@ jobs:
         run: |
           docker run --rm -v ${{ github.workspace }}:/work -w /work library/${{ matrix.version }} bash -c "apt update && apt install -y --no-install-recommends ./output/*.deb && ssh -V"
 
+      - name: Set artifact name
+        id: artifact
+        run: echo "name=$(echo ${{ matrix.version }} | sed 's/:/-/g')-${{ matrix.os }}" >> $GITHUB_OUTPUT
+
       - uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.version }}-${{ matrix.os }}
+          name: ${{ steps.artifact.outputs.name }}
           path: ${{ github.workspace }}/output
 
   create_release:
