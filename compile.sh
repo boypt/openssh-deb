@@ -121,8 +121,8 @@ echo "INFO: Building Package: $(head -n1 debian/changelog)"
 
 ### Build OpenSSH Package
 env \
-	DEB_BUILD_OPTIONS="noudeb noddebs nocheck" \
-	DEB_BUILD_PROFILES=pkg.openssh.nognome \
+	DEB_BUILD_OPTIONS="noddebs nocheck" \
+	DEB_BUILD_PROFILES="noudeb pkg.openssh.nognome" \
 	dpkg-buildpackage --no-sign -rfakeroot -b
 popd
 
