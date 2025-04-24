@@ -42,7 +42,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.artifact.outputs.name }}
-          path: ${{ github.workspace }}/output
+          path: ${{ github.workspace }}/output/*.deb
 
   create_release:
     # if: ${{ github.ref == 'refs/heads/master' }}
@@ -55,6 +55,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: ./output
+          merge-multiple: true
 
       - name: Get tag message
         run: |
@@ -67,7 +68,7 @@ jobs:
         id: create_release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "${{ github.workspace }}/output/*"
+          artifacts: "${{ github.workspace }}/output/*.deb"
           bodyFile: ${{ github.workspace }}/RELEASE.md
           token: ${{ secrets.GITHUB_TOKEN }}
           allowUpdates: true
