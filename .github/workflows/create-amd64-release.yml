@@ -40,7 +40,6 @@ jobs:
   build_ubuntu22:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
-    # Not available now, lack of package `dh-sequence-movetousr`
     continue-on-error: false
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -86,31 +85,6 @@ jobs:
           name: ubuntu20-amd64
           path: ${{ github.workspace }}/output
 
-  build_ubuntu18:
-    # The type of runner that the job will run on
-    runs-on: ubuntu-latest
-    continue-on-error: true
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
-    steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: "Compile Ubuntu 18.04 (bionic) [amd64]"
-        run: |
-          ./pullsrc.sh
-          docker run --rm -v ${{ github.workspace }}:/work -w /work  library/ubuntu:18.04 bash -c "./install_deps.sh && ./compile.sh"
-
-      - name: "Install test with Ubuntu (focal) [amd64]"
-        run: |
-          docker run --rm -v ${{ github.workspace }}:/work -w /work  library/ubuntu:18.04 bash -c "apt update && apt install -y --no-install-recommends ./output/*.deb && ssh -V"
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: ubuntu18-amd64
-          path: ${{ github.workspace }}/output
-
   build_debian13:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
@@ -138,7 +112,6 @@ jobs:
   build_debian12:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
-    # Not available now, lack of package `dh-sequence-movetousr`
     continue-on-error: false
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -189,7 +162,6 @@ jobs:
       - build_ubuntu24
       - build_ubuntu22
       - build_ubuntu20
-      - build_ubuntu18
       - build_debian13
       - build_debian12
       - build_debian11
@@ -210,12 +182,6 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: ubuntu20-amd64
-          path: ./output
-
-      - uses: actions/download-artifact@v4
-        continue-on-error: true
-        with:
-          name: ubuntu18-amd64
           path: ./output
 
       - uses: actions/download-artifact@v4

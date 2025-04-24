@@ -89,11 +89,6 @@ if [[ $STATIC_OPENSSL -eq 1 ]]; then
 	sed -i "/^override_dh_auto_configure-arch:/iDEB_CONFIGURE_SCRIPT_ENV += LD_LIBRARY_PATH=${OPENSSLDIR}" debian/rules
 fi
 
-## dont generate sharelib depend in Ubuntu 1804
-if grep -q bionic /etc/*-release; then
-	sed -i '/shlibs:Depends/d' debian/control
-fi
-
 ## wtmpdb not available in older distros
 if ! dpkg -l libwtmpdb-dev; then
 	sed -i '/libwtmpdb-dev/d' debian/control
