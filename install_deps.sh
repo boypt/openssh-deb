@@ -63,17 +63,7 @@ CODE_NAME=$(lsb_release -sc) && \
             apt update; \
             apt install -y dh-sequence-movetousr debhelper; \
             ;; \
-        bionic) \
-            apt install -y gnupg && \
-            echo "deb $DEBIAN_SOURCE bullseye main" >> /etc/apt/sources.list; \
-            KEYS=$(apt update 2>&1 | grep -o 'NO_PUBKEY [A-F0-9]\+' | sed 's/NO_PUBKEY //' | sort | uniq || true); \
-            for KEY in ${KEYS}; \
-            do \
-                apt-key adv --keyserver ${OPENPGP_SERVER} --recv-keys ${KEY}; \
-            done; \
-            apt update; \
-            apt install -y dwz dh-runit; \
-            ;; \
+	## ubuntu bionic support dropped. previous hack compiles ok but cannot install due to systemd dependencies
         *) \
             echo "$CODE_NAME is NOT NEED to add Debian sources."; \
             ;; \
