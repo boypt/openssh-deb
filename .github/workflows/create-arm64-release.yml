@@ -41,7 +41,7 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-24.04-arm
     # Not available now, lack of package `dh-sequence-movetousr`
-    continue-on-error: true
+    continue-on-error: false
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -89,6 +89,7 @@ jobs:
   build_ubuntu18:
     # The type of runner that the job will run on
     runs-on: ubuntu-24.04-arm
+    continue-on-error: true
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -138,7 +139,7 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-24.04-arm
     # Not available now, lack of package `dh-sequence-movetousr`
-    continue-on-error: true
+    continue-on-error: false
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -163,7 +164,7 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-24.04-arm
     # Not available now, lack of package `dh-sequence-movetousr`
-    continue-on-error: true
+    continue-on-error: false
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
