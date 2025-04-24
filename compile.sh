@@ -89,6 +89,11 @@ if [[ $STATIC_OPENSSL -eq 1 ]]; then
 	sed -i "/^override_dh_auto_configure-arch:/iDEB_CONFIGURE_SCRIPT_ENV += LD_LIBRARY_PATH=${OPENSSLDIR}" debian/rules
 fi
 
+## dont generate sharelib depend in Ubuntu 1804
+if grep -q bionic /etc/*-release; then
+	sed -i '/shlibs:Depends/d' debian/control
+fi
+
 ## wtmpdb not available in older distros
 if ! dpkg -l libwtmpdb-dev; then
 	sed -i '/libwtmpdb-dev/d' debian/control
@@ -116,7 +121,7 @@ echo "INFO: Building Package: $(head -n1 debian/changelog)"
 
 ### Build OpenSSH Package
 env \
-	DEB_BUILD_OPTIONS="noddebs nocheck" \
+	DEB_BUILD_OPTIONS="noudeb noddebs nocheck" \
 	DEB_BUILD_PROFILES=pkg.openssh.nognome \
 	dpkg-buildpackage --no-sign -rfakeroot -b
 popd
@@ -125,4 +130,4 @@ popd
 cd $__dir
 mkdir -p output
 mv -f build/*.deb output/ 2> /dev/null || echo "No deb packages created!"
-mv -f build/*.udeb output/ 2> /dev/null || echo "No udeb packages created!"
+#mv -f build/*.udeb output/ 2> /dev/null || echo "No udeb packages created!"
