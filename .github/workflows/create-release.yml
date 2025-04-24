@@ -18,19 +18,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, ubuntu-24.04-arm]
-        include:
-          - distro: ubuntu
-            version: noble
-          - distro: ubuntu
-            version: jammy
-          - distro: ubuntu
-            version: focal
-          - distro: debian
-            version: trixie
-          - distro: debian
-            version: bookworm
-          - distro: debian
-            version: bullseye
+        version: ["ubuntu:noble", "ubuntu:jammy", "ubuntu:focal", "debian:trixie", "debian:bookworm", "debian:bullseye"]
       fail-fast: false
 
     steps:
@@ -38,22 +26,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: "Compile ${{ matrix.distro }} ${{ matrix.version }} (${{ matrix.version }})"
+      - name: "Compile ${{ matrix.version }} on ${{ matrix.os }}"
         run: |
           ./pullsrc.sh
-          docker run --rm -v ${{ github.workspace }}:/work -w /work library/${{ matrix.distro }}:${{ matrix.version }} bash -c "./install_deps.sh && ./compile.sh"
+          docker run --rm -v ${{ github.workspace }}:/work -w /work library/${{ matrix.version }} bash -c "./install_deps.sh && ./compile.sh"
 
-      - name: "Install test with ${{ matrix.distro }} (${{ matrix.version }})"
+      - name: "Install test with ${{ matrix.version }}"
         run: |
-          docker run --rm -v ${{ github.workspace }}:/work -w /work library/${{ matrix.distro }}:${{ matrix.version }} bash -c "apt update && apt install -y --no-install-recommends ./output/*.deb && ssh -V"
+          docker run --rm -v ${{ github.workspace }}:/work -w /work library/${{ matrix.version }} bash -c "apt update && apt install -y --no-install-recommends ./output/*.deb && ssh -V"
 
       - uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.distro }}${{ matrix.version }}-${{ matrix.os }}
+          name: ${{ matrix.version }}-${{ matrix.os }}
           path: ${{ github.workspace }}/output
 
   create_release:
-    if: ${{ github.ref == 'refs/heads/master' }}
+    # if: ${{ github.ref == 'refs/heads/master' }}
     needs: build
     runs-on: ubuntu-latest
     steps:
