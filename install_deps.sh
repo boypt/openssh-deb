@@ -41,7 +41,7 @@ fi
 # *ONLY* used at:
 # Ubuntu series: jammy & bionic
 # Debian series: bullseye & bookworm
-DEBIAN_SOURCE="http://ftp.debian.org/debian/"
+DEBIAN_SOURCE="http://deb.debian.org/debian/"
 OPENPGP_SERVER="keyserver.ubuntu.com"
 
 [[ -n "${APT_MIRROR+x}" ]] && DEBIAN_SOURCE="http://${APT_MIRROR}/debian/"
@@ -72,8 +72,16 @@ CODE_NAME=$(lsb_release -sc) && \
 ## install local deps on older distros
 __debhelper_ver="$(dpkg-query -f '${Version}' -W debhelper || true)"
 [[ -z $__debhelper_ver ]] && __debhelper_ver="0.0.0"
+__coreutils_ver="$(dpkg-query -f '${Version}' -W coreutils || true)"
+[[ -z $__coreutils_ver ]] && __coreutils_ver="0.0.0"
+
+echo "DEBUG: __coreutils_ver:$__coreutils_ver"
 echo "DEBUG: __debhelper_ver:$__debhelper_ver"
-dpkg --compare-versions $__debhelper_ver le '13.1~' && \
-   sudo apt install -y $__dir/builddep/*.deb
+
+# the latest debhelper calls `cp --update=none` which is unsupported in older coreutils
+# downgrade debhelper the our fixed version instead.
+if dpkg --compare-versions $__debhelper_ver le '13.1~' || dpkg --compare-versions $__coreutils_ver le '9.5~'; then \
+   sudo apt install -y --allow-downgrades $__dir/builddep/*.deb
+fi
 
 exit 0
