@@ -21,8 +21,22 @@ __libfido2_ver="$(dpkg-query -f '${Version}' -W libfido2-dev || true)"
 __initsystemhelpers_ver="$(dpkg-query -f '${Version}' -W init-system-helpers || true)"
 [[ -z $__initsystemhelpers_ver ]] && __initsystemhelpers_ver="0.0.0"
 
-source $__dir/version.env
 STATIC_OPENSSL=0
+source $__dir/version.env
+
+RETRY_COUNT=0
+MAX_RETRIES=10
+while [[ -z ${OPENSSH_SIDPKG:-} ]]; do
+	RETRY_COUNT=$((RETRY_COUNT+1))
+	if [[ $RETRY_COUNT -gt $MAX_RETRIES ]]; then
+		echo "Error: Failed to get OPENSSH_SIDPKG from version.env after $MAX_RETRIES retries." >&2
+		exit 1
+	fi
+	echo "Warning: OPENSSH_SIDPKG is not set. Retrying in 3 seconds... (Attempt ${RETRY_COUNT}/${MAX_RETRIES})"
+	source $__dir/version.env
+	sleep 3
+done
+
 if dpkg --compare-versions $__libssl lt '3.0.0' || [[ -n ${FORCESSL+x} ]]; then
 	STATIC_OPENSSL=1
 fi
