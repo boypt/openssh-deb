@@ -44,7 +44,19 @@ fi
 
 
 # install the latest debhelper from debian sid by adding debian sources
-_DEBIAN_SID_DEBHELPER() {
+_DEBIAN_DEBHELPER() {
+
+    local __coreutils_ver="$(dpkg-query -f '${Version}' -W coreutils || true)"
+    [[ -z $__coreutils_ver ]] && __coreutils_ver="0.0.0"
+    echo "DEBUG: __coreutils_ver:$__coreutils_ver"
+
+    # Note: latest debhelper calls `cp --update=none` which is unsupported with coreutils < 9.5
+    # Install a fixed version of debhelper in our repo instead.
+    if dpkg --compare-versions "$__coreutils_ver" le '9.5~'; then
+        sudo apt install -y --allow-downgrades "$__dir"/builddep/*.deb
+        return 0
+    fi
+
     DEBIAN_SOURCE="http://deb.debian.org/debian/"
     [[ -n "${APT_MIRROR:-}" ]] && \
         DEBIAN_SOURCE="http://${APT_MIRROR}/debian/"
@@ -60,38 +72,28 @@ _DEBIAN_SID_DEBHELPER() {
     rm /etc/apt/sources.list.d/debian-sid.list
 }
 
-__coreutils_ver="$(dpkg-query -f '${Version}' -W coreutils || true)"
-[[ -z $__coreutils_ver ]] && __coreutils_ver="0.0.0"
-echo "DEBUG: __coreutils_ver:$__coreutils_ver"
-
-# Note: latest debhelper calls `cp --update=none` which is unsupported in coreutils < 9.5
-# Install a fixed version of debhelper in our repo instead.
-if dpkg --compare-versions "$__coreutils_ver" le '9.5~'; then
-   sudo apt install -y --allow-downgrades "$__dir"/builddep/*.deb
-fi
-
-CODE_NAME=$(lsb_release -sc)
-# if [ "${CODE_NAME}" != "focal" ]; then
-#     apt install -y dh-virtualenv
-# fi
-# case ${CODE_NAME} in
-#     # dists with coreutils >= 9.5 can use the latest debhelper from debian sid
-#     trixie)
-#         _DEBIAN_SID_DEBHELPER
-#         ;;
-#     plucky|questing|resolute)
-#         _DEBIAN_SID_DEBHELPER
-#         ;;
-#     *)
-#         echo "$CODE_NAME does NOT NEED to add Debian sources."
-#         ;;
-# esac
-
 __debhelper_ver="$(dpkg-query -f '${Version}' -W debhelper || true)"
 [[ -z $__debhelper_ver ]] && __debhelper_ver="0.0.0"
 echo "DEBUG: __debhelper_ver:$__debhelper_ver"
 if dpkg --compare-versions "$__debhelper_ver" le '13.1~'; then
    sudo apt install -y "$__dir"/builddep/*.deb
 fi
+
+#CODE_NAME=$(lsb_release -sc)
+# if [ "${CODE_NAME}" != "focal" ]; then
+#     apt install -y dh-virtualenv
+# fi
+# case ${CODE_NAME} in
+#     # dists with coreutils >= 9.5 can use the latest debhelper from debian sid
+#     trixie)
+#         _DEBIAN_DEBHELPER
+#         ;;
+#     plucky|questing|resolute)
+#         _DEBIAN_DEBHELPER
+#         ;;
+#     *)
+#         echo "$CODE_NAME does NOT NEED to add Debian sources."
+#         ;;
+# esac
 
 exit 0
