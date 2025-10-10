@@ -60,41 +60,38 @@ _DEBIAN_SID_DEBHELPER() {
     rm /etc/apt/sources.list.d/debian-sid.list
 }
 
-CODE_NAME=$(lsb_release -sc)
-
-# if [ "${CODE_NAME}" != "focal" ]; then
-#     apt install -y dh-virtualenv
-# fi
-
 __coreutils_ver="$(dpkg-query -f '${Version}' -W coreutils || true)"
 [[ -z $__coreutils_ver ]] && __coreutils_ver="0.0.0"
 echo "DEBUG: __coreutils_ver:$__coreutils_ver"
 
 # Note: latest debhelper calls `cp --update=none` which is unsupported in coreutils < 9.5
-# Install a fixed version of debhelp in our repo instead
+# Install a fixed version of debhelper in our repo instead.
 if dpkg --compare-versions "$__coreutils_ver" le '9.5~'; then
-   sudo apt install -y "$__dir"/builddep/*.deb
+   sudo apt install -y --allow-downgrades "$__dir"/builddep/*.deb
 fi
 
-case ${CODE_NAME} in
-    # dists with coreutils >= 9.5 can use the latest debhelper from debian sid
-    trixie)
-        # _DEBIAN_SID_DEBHELPER
-        ;;
-    plucky|questing|resolute)
-        # _DEBIAN_SID_DEBHELPER
-        ;;
-    *)
-        echo "$CODE_NAME does NOT NEED to add Debian sources."
-        ;;
-esac
+CODE_NAME=$(lsb_release -sc)
+# if [ "${CODE_NAME}" != "focal" ]; then
+#     apt install -y dh-virtualenv
+# fi
+# case ${CODE_NAME} in
+#     # dists with coreutils >= 9.5 can use the latest debhelper from debian sid
+#     trixie)
+#         _DEBIAN_SID_DEBHELPER
+#         ;;
+#     plucky|questing|resolute)
+#         _DEBIAN_SID_DEBHELPER
+#         ;;
+#     *)
+#         echo "$CODE_NAME does NOT NEED to add Debian sources."
+#         ;;
+# esac
 
 __debhelper_ver="$(dpkg-query -f '${Version}' -W debhelper || true)"
 [[ -z $__debhelper_ver ]] && __debhelper_ver="0.0.0"
 echo "DEBUG: __debhelper_ver:$__debhelper_ver"
-
 if dpkg --compare-versions "$__debhelper_ver" le '13.1~'; then
-   sudo apt install -y --allow-downgrades "$__dir"/builddep/*.deb
+   sudo apt install -y "$__dir"/builddep/*.deb
 fi
 
 exit 0
