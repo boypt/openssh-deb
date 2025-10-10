@@ -22,6 +22,8 @@ __initsystemhelpers_ver="$(dpkg-query -f '${Version}' -W init-system-helpers || 
 [[ -z $__initsystemhelpers_ver ]] && __initsystemhelpers_ver="0.0.0"
 
 STATIC_OPENSSL=0
+
+echo "Getting version from version.env ..."
 source $__dir/version.env
 
 RETRY_COUNT=0
