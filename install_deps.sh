@@ -75,7 +75,8 @@ _DEBIAN_DEBHELPER() {
 __debhelper_ver="$(dpkg-query -f '${Version}' -W debhelper || true)"
 [[ -z $__debhelper_ver ]] && __debhelper_ver="0.0.0"
 echo "DEBUG: __debhelper_ver:$__debhelper_ver"
-if dpkg --compare-versions "$__debhelper_ver" le '13.1~'; then
+if dpkg --compare-versions "$__debhelper_ver" lt '13.12~'; then
+   # dh-sequence-movetousr was added to debhelper in 13.11.7
    sudo apt install -y "$__dir"/builddep/*.deb
 fi
 
