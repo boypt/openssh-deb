@@ -42,39 +42,29 @@ if [[ $(apt-cache search --names-only 'libfido2-dev' | wc -l) -gt 0 ]]; then
 	apt install -y libfido2-dev libcbor-dev
 fi
 
-# The following parameters are used for installing Debian distribution packages
-# on Ubuntu systems or old Debian systems.
-# *ONLY* used at:
-# Ubuntu series: jammy & bionic
-# Debian series: bullseye & bookworm
-DEBIAN_SOURCE="http://deb.debian.org/debian/"
-OPENPGP_SERVER="keyserver.ubuntu.com"
 
-if [[ -n "${APT_MIRROR:-}" ]]; then
-    DEBIAN_SOURCE="http://${APT_MIRROR}/debian/"
-fi
-if [[ -n "${PGP_SERVER:-}" ]]; then
-    OPENPGP_SERVER="${PGP_SERVER}"
-fi
-
+# install the latest debhelper from debian sid by adding debian sources
 _DEBIAN_SID_DEBHELPER() {
-    # install the latest debhelper from debian sid by adding debian sources
-    apt install -y gnupg
-    echo "deb $DEBIAN_SOURCE sid main" >> /etc/apt/sources.list
-    # Allow apt update to fail in order to capture missing keys
-    KEYS=$(apt update 2>&1 | grep -o 'NO_PUBKEY [A-F0-9]\+' | sed 's/NO_PUBKEY //' | sort | uniq || true)
-    for KEY in ${KEYS}; do
-        apt-key adv --keyserver "${OPENPGP_SERVER}" --recv-keys "${KEY}"
-    done
+    DEBIAN_SOURCE="http://deb.debian.org/debian/"
+    [[ -n "${APT_MIRROR:-}" ]] && \
+        DEBIAN_SOURCE="http://${APT_MIRROR}/debian/"
+
+    # Download Debian sid GPG key
+    wget -O /usr/share/keyrings/debian-sid.gpg https://deb.debian.org/debian/dists/sid/Release.gpg
+
+    # Add Debian sid source with the GPG key
+    echo "deb [signed-by=/usr/share/keyrings/debian-sid.gpg] $DEBIAN_SOURCE sid main" > /etc/apt/sources.list.d/debian-sid.list
+
     apt update
     apt install -y debhelper
+    rm /etc/apt/sources.list.d/debian-sid.list
 }
 
 CODE_NAME=$(lsb_release -sc)
 
-if [ "${CODE_NAME}" != "focal" ]; then
-    apt install -y dh-virtualenv
-fi
+# if [ "${CODE_NAME}" != "focal" ]; then
+#     apt install -y dh-virtualenv
+# fi
 
 __coreutils_ver="$(dpkg-query -f '${Version}' -W coreutils || true)"
 [[ -z $__coreutils_ver ]] && __coreutils_ver="0.0.0"
@@ -89,10 +79,10 @@ fi
 case ${CODE_NAME} in
     # dists with coreutils >= 9.5 can use the latest debhelper from debian sid
     trixie)
-        _DEBIAN_SID_DEBHELPER
+        # _DEBIAN_SID_DEBHELPER
         ;;
     plucky|questing|resolute)
-        _DEBIAN_SID_DEBHELPER
+        # _DEBIAN_SID_DEBHELPER
         ;;
     *)
         echo "$CODE_NAME does NOT NEED to add Debian sources."
