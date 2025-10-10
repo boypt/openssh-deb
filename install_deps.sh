@@ -50,9 +50,10 @@ _DEBIAN_DEBHELPER() {
     [[ -z $__coreutils_ver ]] && __coreutils_ver="0.0.0"
     echo "DEBUG: __coreutils_ver:$__coreutils_ver"
 
-    # Note: latest debhelper calls `cp --update=none` which is unsupported with coreutils < 9.5
-    # Install a fixed version of debhelper in our repo instead.
-    if dpkg --compare-versions "$__coreutils_ver" le '9.5~'; then
+    # Note: with coreutils < 9.5, `cp --update=none` is not supported.
+    # But the latest debhelper generate such commands.
+    # Using the latest debhelper would fail.
+    if dpkg --compare-versions "$__coreutils_ver" lt '9.5~'; then
         sudo apt install -y --allow-downgrades "$__dir"/builddep/*.deb
         return 0
     fi
