@@ -17,16 +17,22 @@ __root="$(cd "$(dirname "${__dir}")" && pwd)" # <-- change this as it depends on
 
 export DEBIAN_FRONTEND=noninteractive
 
-if [[ -n "${APT_MIRROR+x}" ]]; then \
-	[[ -f /etc/apt/sources.list ]] && \
-		sed -i "s|$(awk '/^deb/{print $2}' /etc/apt/sources.list | head -n1 | cut -d/ -f3)|${APT_MIRROR}|" /etc/apt/sources.list && \
-		sed -i "/security.ubuntu.com/s|^|#|" /etc/apt/sources.list 
+if [[ -n "${APT_MIRROR:-}" ]]; then
+	if [[ -f /etc/apt/sources.list ]]; then
+		# Extract the hostname from the first 'deb' line and replace it
+		original_mirror=$(awk '/^deb/{print $2}' /etc/apt/sources.list | head -n1 | cut -d/ -f3)
+		sed -i "s|${original_mirror}|${APT_MIRROR}|" /etc/apt/sources.list
+		# Comment out the security update source to avoid potential issues from mixed mirror sources
+		sed -i "/security.ubuntu.com/s|^|#|" /etc/apt/sources.list
+	fi
 
-	[[ -f /etc/apt/sources.list.d/debian.sources ]] && \
+	if [[ -f /etc/apt/sources.list.d/debian.sources ]]; then
 		sed -i "s|deb.debian.org|${APT_MIRROR}|" /etc/apt/sources.list.d/debian.sources
+	fi
 fi
 
-apt update && apt upgrade -y
+apt update
+apt upgrade -y
 apt install -y --no-install-recommends lsb-release wget sudo pkgconf build-essential fakeroot \
 	dpkg-dev debhelper debhelper-compat dh-exec dh-runit \
 	libaudit-dev libedit-dev libgtk-3-dev libselinux1-dev libsystemd-dev \
@@ -44,44 +50,61 @@ fi
 DEBIAN_SOURCE="http://deb.debian.org/debian/"
 OPENPGP_SERVER="keyserver.ubuntu.com"
 
-[[ -n "${APT_MIRROR+x}" ]] && DEBIAN_SOURCE="http://${APT_MIRROR}/debian/"
-[[ -n "${PGP_SERVER+x}" ]] && OPENPGP_SERVER="${PGP_SERVER}"
+if [[ -n "${APT_MIRROR:-}" ]]; then
+    DEBIAN_SOURCE="http://${APT_MIRROR}/debian/"
+fi
+if [[ -n "${PGP_SERVER:-}" ]]; then
+    OPENPGP_SERVER="${PGP_SERVER}"
+fi
 
-CODE_NAME=$(lsb_release -sc) && \
-    if [ ${CODE_NAME} != "focal" ]; then \
-        apt install -y dh-virtualenv; \
-    fi && \
-    case ${CODE_NAME} in \
-        jammy|bookworm|bullseye) \
-            apt install -y gnupg && \
-            echo "deb $DEBIAN_SOURCE sid main" >> /etc/apt/sources.list; \
-            KEYS=$(apt update 2>&1 | grep -o 'NO_PUBKEY [A-F0-9]\+' | sed 's/NO_PUBKEY //' | sort | uniq || true); \
-            for KEY in ${KEYS}; \
-            do \
-                apt-key adv --keyserver ${OPENPGP_SERVER} --recv-keys ${KEY}; \
-            done; \
-            apt update; \
-            apt install -y dh-sequence-movetousr debhelper; \
-            ;; \
-	## ubuntu bionic support dropped. previous hack compiles ok but cannot install due to systemd dependencies
-        *) \
-            echo "$CODE_NAME is NOT NEED to add Debian sources."; \
-            ;; \
-    esac
+_DEBIAN_SID_DEBHELPER() {
+    # install the latest debhelper from debian sid by adding debian sources
+    apt install -y gnupg
+    echo "deb $DEBIAN_SOURCE sid main" >> /etc/apt/sources.list
+    # Allow apt update to fail in order to capture missing keys
+    KEYS=$(apt update 2>&1 | grep -o 'NO_PUBKEY [A-F0-9]\+' | sed 's/NO_PUBKEY //' | sort | uniq || true)
+    for KEY in ${KEYS}; do
+        apt-key adv --keyserver "${OPENPGP_SERVER}" --recv-keys "${KEY}"
+    done
+    apt update
+    apt install -y debhelper
+}
 
-## install local deps on older distros
-__debhelper_ver="$(dpkg-query -f '${Version}' -W debhelper || true)"
-[[ -z $__debhelper_ver ]] && __debhelper_ver="0.0.0"
+CODE_NAME=$(lsb_release -sc)
+
+if [ "${CODE_NAME}" != "focal" ]; then
+    apt install -y dh-virtualenv
+fi
+
 __coreutils_ver="$(dpkg-query -f '${Version}' -W coreutils || true)"
 [[ -z $__coreutils_ver ]] && __coreutils_ver="0.0.0"
-
 echo "DEBUG: __coreutils_ver:$__coreutils_ver"
+
+# Note: latest debhelper calls `cp --update=none` which is unsupported in coreutils < 9.5
+# Install a fixed version of debhelp in our repo instead
+if dpkg --compare-versions "$__coreutils_ver" le '9.5~'; then
+   sudo apt install -y "$__dir"/builddep/*.deb
+fi
+
+case ${CODE_NAME} in
+    # dists with coreutils >= 9.5 can use the latest debhelper from debian sid
+    trixie)
+        _DEBIAN_SID_DEBHELPER
+        ;;
+    plucky|questing|resolute)
+        _DEBIAN_SID_DEBHELPER
+        ;;
+    *)
+        echo "$CODE_NAME does NOT NEED to add Debian sources."
+        ;;
+esac
+
+__debhelper_ver="$(dpkg-query -f '${Version}' -W debhelper || true)"
+[[ -z $__debhelper_ver ]] && __debhelper_ver="0.0.0"
 echo "DEBUG: __debhelper_ver:$__debhelper_ver"
 
-# the latest debhelper calls `cp --update=none` which is unsupported in older coreutils
-# downgrade debhelper the our fixed version instead.
-if dpkg --compare-versions $__debhelper_ver le '13.1~' || dpkg --compare-versions $__coreutils_ver le '9.5~'; then \
-   sudo apt install -y --allow-downgrades $__dir/builddep/*.deb
+if dpkg --compare-versions "$__debhelper_ver" le '13.1~'; then
+   sudo apt install -y --allow-downgrades "$__dir"/builddep/*.deb
 fi
 
 exit 0
