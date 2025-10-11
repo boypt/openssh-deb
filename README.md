@@ -34,6 +34,12 @@ If your server OS is in the supported list, you can download and install them in
 sudo bash -c "$(curl -L https://github.com/boypt/openssh-deb/raw/master/lazy_install.sh)"
 ```
 
+Or when the host needs a github proxy to access:
+
+```bash
+sudo bash -c "$(curl -L https://github.com/boypt/openssh-deb/raw/master/lazy_install.sh)" @ gh-proxy.com
+```
+
 ## Direct Build
 
 ```bash
