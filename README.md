@@ -37,7 +37,7 @@ sudo bash -c "$(curl -L https://github.com/boypt/openssh-deb/raw/master/lazy_ins
 Or when the host needs a github proxy to access:
 
 ```bash
-sudo bash -c "$(curl -L https://github.com/boypt/openssh-deb/raw/master/lazy_install.sh)" @ gh-proxy.com
+sudo bash -c "$(curl -L https://gh-proxy.com/github.com/boypt/openssh-deb/raw/master/lazy_install.sh)" @ gh-proxy.com
 ```
 
 ## Direct Build
