@@ -10,6 +10,10 @@ sudo apt install -y wget jq lsb-release
 
 #GH_PROXY=https://tvv.tw/
 #GH_PROXY=https://gh-proxy.com/
+[[ -n ${1:-} ]] && GH_PROXY=${1:-} && \
+    if ! [[ "$GH_PROXY" =~ ^https://.*/$ ]]; then
+        GH_PROXY=https://${GH_PROXY}/
+    fi
 
 _REPO=boypt/openssh-deb
 _LATEST_API=${GH_PROXY:-}https://api.github.com/repos/${_REPO}/releases/latest
