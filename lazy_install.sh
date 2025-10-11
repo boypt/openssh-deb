@@ -40,7 +40,7 @@ if [[ $(find . -type f -name "*${_CN}*.deb" | wc -l) -gt 0 ]]; then
     echo "> These DEBs is going to be installed... Ctrl+C to interrupt"
     find . -type f -name "*${_CN}*.deb" -print
     sleep 3
-    sudo apt install -y *${_CN}*.deb
+    find . -type f -name "*${_CN}*.deb" -print | xargs sudo apt install -y
 fi
 popd
 
