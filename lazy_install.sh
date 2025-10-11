@@ -16,7 +16,11 @@ sudo apt install -y wget jq lsb-release
     fi
 
 _REPO=boypt/openssh-deb
-_LATEST_API=${GH_PROXY:-}https://api.github.com/repos/${_REPO}/releases/latest
+_LATEST_API=https://api.github.com/repos/${_REPO}/releases/latest
+
+if [[ -n ${GH_PROXY:-} ]] && ! [[ $_LATEST_API =~ ^${GH_PROXY}.* ]]; then
+    _LATEST_API="${GH_PROXY}${_LATEST_API}"
+fi
 
 _WORKDIR=$(mktemp -d)
 _CN=$(lsb_release -sc)
