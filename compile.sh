@@ -80,7 +80,7 @@ if [[ $STATIC_OPENSSL -eq 1 ]]; then
 	mkdir -p openssl
 	tar xfz $__dir/downloads/$OPENSSLSRC --strip-components=1 -C openssl
 	pushd openssl
-	./config shared zlib -fPIC
+	./config no-dgram no-tests shared zlib -fPIC
 	make -j$(nproc)
 	OPENSSLDIR=$PWD
 	popd
