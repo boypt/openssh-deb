@@ -36,6 +36,7 @@ jobs:
           docker run --rm -v ${{ github.workspace }}:/work -w /work library/${{ matrix.version }} bash -c "apt update && apt install -y --no-install-recommends ./output/*.deb && ssh -V"
 
       - name: Pack .deb files into tar.gz
+        id: pack
         run: |
           CODENAME=$(echo "${{ matrix.version }}" | cut -d':' -f2)
           if [[ "${{ matrix.os }}" == *"-arm"* ]]; then
@@ -47,9 +48,12 @@ jobs:
           cd ${{ github.workspace }}/output
           tar -czf ../openssh-${CODENAME}-${ARCH}.tar.gz *.deb
 
+          SAFE_VERSION=$(echo "${{ matrix.version }}" | sed 's/:/-/g')
+          echo "artifact_name=${SAFE_VERSION}-${{ matrix.os }}" >> $GITHUB_OUTPUT
+
       - uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.version }}-${{ matrix.os }}
+          name: upload-${{ steps.pack.outputs.artifact_name }}
           path: ${{ github.workspace }}/openssh-*.tar.gz
 
   create_release:
