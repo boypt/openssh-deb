@@ -5,8 +5,8 @@ set -o pipefail
 set -o nounset
 set -o xtrace
 trap 'echo -e "Aborted, error $? in command: $BASH_COMMAND"; trap ERR; exit 1' ERR
-# make sure you have the tools
-sudo apt install -y wget jq lsb-release
+
+sudo apt install -y wget jq lsb-release tar
 
 #GH_PROXY=https://tvv.tw/
 #GH_PROXY=https://gh-proxy.com/
@@ -25,22 +25,31 @@ fi
 _WORKDIR=$(mktemp -d)
 _CN=$(lsb_release -sc)
 _AR=$(dpkg --print-architecture)
+_TARGET_ARCH="${_AR}"
 
 pushd $_WORKDIR
-mapfile -t DEB_URLS < <(wget -O- "$_LATEST_API" \
-    | jq -r ".assets[] | select(.name | contains(\"${_CN}_${_AR}\") or contains(\"${_CN}_all\")) | .browser_download_url" )
+TAR_URL=$(wget -O- "$_LATEST_API" \
+    | jq -r ".assets[] | select(.name | contains(\"${_CN}\") and contains(\"${_TARGET_ARCH}\") and (endswith(\".tar.gz\"))) | .browser_download_url" | head -n 1)
 
-if [[ -n ${GH_PROXY:-} ]] && ! printf '%s\n' "${DEB_URLS[@]}" | grep ${GH_PROXY}; then
-    printf '%s\n' "${DEB_URLS[@]}" | sed "s|https://github.com|${GH_PROXY:-}https://github.com|g" | wget -i -
-else
-    printf '%s\n' "${DEB_URLS[@]}" | wget -i -
+if [[ -z "$TAR_URL" ]]; then
+    echo "Error: No matching release package found for ${_CN}-${_TARGET_ARCH}."
+    exit 1
 fi
 
-if [[ $(find . -type f -name "*${_CN}*.deb" | wc -l) -gt 0 ]]; then
-    echo "> These DEBs is going to be installed... Ctrl+C to interrupt"
-    find . -type f -name "*${_CN}*.deb" -print
+if [[ -n ${GH_PROXY:-} ]] && ! [[ "$TAR_URL" =~ ^${GH_PROXY}.* ]]; then
+    TAR_URL=$(echo "$TAR_URL" | sed "s|https://github.com|${GH_PROXY:-}https://github.com|g")
+fi
+
+wget -O- "$TAR_URL" | tar -xzf -
+
+if [[ $(find . -type f -name "*.deb" | wc -l) -gt 0 ]]; then
+    echo "> These DEBs are going to be installed... Ctrl+C to interrupt"
+    find . -type f -name "*.deb" -print
     sleep 3
-    find . -type f -name "*${_CN}*.deb" -print | xargs sudo apt install -y
+    find . -type f -name "*.deb" -print | xargs sudo apt install -y
+else
+    echo "Error: No .deb packages found inside the archive."
+    exit 1
 fi
 popd
 
