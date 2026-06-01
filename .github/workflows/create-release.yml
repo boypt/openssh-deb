@@ -38,18 +38,17 @@ jobs:
       - name: Pack .deb files into tar.gz
         id: pack
         run: |
+          TAG_NAME="${{ github.ref_name }}"
           CODENAME=$(echo "${{ matrix.version }}" | cut -d':' -f2)
-          if [[ "${{ matrix.os }}" == *"-arm"* ]]; then
-            ARCH="arm64"
-          else
-            ARCH="amd64"
-          fi
+
+          ARCH="amd64"
+          [[ "${{ matrix.os }}" == *arm* ]] && ARCH="arm64"
           
           cd ${{ github.workspace }}/output
-          tar -czf ../openssh-${CODENAME}-${ARCH}.tar.gz *.deb
+          tar -cvzf ../openssh-${TAG_NAME}-${CODENAME}-${ARCH}.tar.gz *.deb
 
           SAFE_VERSION=$(echo "${{ matrix.version }}" | sed 's/:/-/g')
-          echo "artifact_name=${SAFE_VERSION}-${{ matrix.os }}" >> $GITHUB_OUTPUT
+          echo "artifact_name=${SAFE_VERSION}-${ARCH}" >> $GITHUB_OUTPUT
 
       - uses: actions/upload-artifact@v4
         with:
