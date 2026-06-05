@@ -10,7 +10,7 @@ Package version are defined in `version.env` file.
 
 Current version (CI Build version): (script follows `debian/sid` automatically)
 
-- OpenSSH 10.3p1-3
+- OpenSSH 10.3p1-4
 - OpenSSL 3.5.6
 
 ### Supported (tested) Distro:
