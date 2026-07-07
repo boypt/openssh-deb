@@ -116,9 +116,6 @@ if dpkg --compare-versions $__initsystemhelpers_ver lt '1.66'; then
 	sed -i '/init-system-helpers/s|1.66|1.50|' debian/control
 fi
 
-## Skip openssh-tests packages
-sed -i '/^Package: openssh-tests$/ { n; s/^/Build-Profiles: <!pkg.openssh.notests>\n/; }' debian/control
-
 ## PATCH 10.4p1-1
 sed -i '/chmod +x debian\/openssh-tests/s|^|#|' debian/rules
 
@@ -139,7 +136,7 @@ echo "INFO: Building Package: $(head -n1 debian/changelog)"
 ### Build OpenSSH Package
 env \
 	DEB_BUILD_OPTIONS="noddebs nocheck" \
-	DEB_BUILD_PROFILES="noudeb pkg.openssh.nognome pkg.openssh.notests" \
+	DEB_BUILD_PROFILES="noudeb pkg.openssh.nognome" \
 	dpkg-buildpackage --no-sign -rfakeroot -b
 popd
 
