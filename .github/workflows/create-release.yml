@@ -1,17 +1,13 @@
-# This is a basic workflow to help you get started with Actions
-
 name: Create release
 
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
     tags: [ "v*" ]
-
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -22,16 +18,18 @@ jobs:
       fail-fast: false
 
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
 
-      - name: "Compile ${{ matrix.version }} on ${{ matrix.os }}"
+      - name: Compile ${{ matrix.version }} on ${{ matrix.os }}
         run: |
           ./pullsrc.sh
           docker run --rm -v ${{ github.workspace }}:/work -w /work library/${{ matrix.version }} bash -c "./install_deps.sh && ./compile.sh"
 
-      - name: "Install test with ${{ matrix.version }}"
+      - name: Install test with ${{ matrix.version }}
         run: |
           docker run --rm -v ${{ github.workspace }}:/work -w /work library/${{ matrix.version }} bash -c "apt update && apt install -y --no-install-recommends ./output/*.deb && ssh -V"
 
@@ -43,14 +41,15 @@ jobs:
 
           ARCH="amd64"
           [[ "${{ matrix.os }}" == *arm* ]] && ARCH="arm64"
-          
+
           cd ${{ github.workspace }}/output
           tar -cvzf ../openssh-${TAG_NAME}-${CODENAME}-${ARCH}.tar.gz *.deb
 
           SAFE_VERSION=$(echo "${{ matrix.version }}" | sed 's/:/-/g')
           echo "artifact_name=${SAFE_VERSION}-${ARCH}" >> $GITHUB_OUTPUT
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
         with:
           name: upload-${{ steps.pack.outputs.artifact_name }}
           path: ${{ github.workspace }}/openssh-*.tar.gz
@@ -58,11 +57,16 @@ jobs:
   create_release:
     needs: build
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
 
       - name: Download all archives
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           path: ./output
           merge-multiple: true
@@ -82,3 +86,4 @@ jobs:
           bodyFile: ${{ github.workspace }}/RELEASE.md
           token: ${{ secrets.GITHUB_TOKEN }}
           allowUpdates: true
+
