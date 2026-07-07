@@ -1,11 +1,10 @@
-# 通用依赖镜像：基于任意 ubuntu/debian 基础镜像，预先跑好 install_deps.sh
-# 用法（构建时传入 BASE_IMAGE）：
+# Dep image
 #   docker build --build-arg BASE_IMAGE=ubuntu:noble -f docker/Dockerfile.deps -t xxx .
 ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 
-COPY install_deps.sh /tmp/install_deps.sh
+COPY --chmod=755 install_deps.sh /tmp/install_deps.sh
+COPY builddep/ /tmp/builddep/
 
-RUN chmod +x /tmp/install_deps.sh \
-    && /tmp/install_deps.sh \
-    && rm -f /tmp/install_deps.sh
+RUN cd /tmp && ./install_deps.sh \
+    && rm -rf /tmp/install_deps.sh /tmp/builddep
