@@ -119,6 +119,9 @@ fi
 ## Skip openssh-tests packages
 sed -i '/^Package: openssh-tests$/ { n; s/^/Build-Profiles: <!pkg.openssh.notests>\n/; }' debian/control
 
+## PATCH 10.4p1-1
+sed -i '/chmod +x debian\/openssh-tests/s|^|#|' debian/rules
+
 ## Check build deps
 if ! dpkg-checkbuilddeps; then
 	echo "The build dependencies are not met, run ./install_deps.sh first."
