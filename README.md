@@ -151,3 +151,16 @@ Run `./compile.sh` from the desktop Terminal(`mate-terminal`).
 During install the `builddep/*.deb`, a `kysec_auth` dialog would pop up asking for installing permissions. Manual click on the permit button is needed. 
 
 If running in a ssh session, the compile script would fail without permissions.
+
+## Technical Details
+
+The build process takes the Debian sid source package and applies the following patches before compiling:
+
+- **Skip test packages**: `openssh-tests` package is excluded from the build (via `BUILD_PACKAGES += -Nopenssh-tests` and a patch to `chmod +x debian/openssh-tests`).
+- **Skip udebs and GNOME askpass**: Build profiles `noudeb` and `pkg.openssh.nognome` are set.
+- **Disable build-time tests**: `DEB_BUILD_OPTIONS=noddebs nocheck` skips compile-time test suites.
+- **Distro codename suffix**: The target distro codename is appended to the package version (e.g. `10.4p1-3~noble`), so the backport can be distinguished from the official package.
+- **Static OpenSSL** (when libssl < 3.0 or `FORCESSL=1`): OpenSSL is compiled from source and linked statically. `libssl-dev` is removed from build deps, and `--with-ssl-dir` is injected into the configure flags.
+- **FIDO2/Security Key** (when libfido2-dev < 1.5.0): Removed from build deps, and `with-security-key-builtin` is changed to `disable-security-key`.
+- **wtmpdb** (when `libwtmpdb-dev` is not available): Removed from build deps and `--with-wtmpdb` is stripped from configure flags.
+- **init-system-helpers** (when installed version < 1.66): Version requirement in `debian/control` is relaxed to 1.50.
