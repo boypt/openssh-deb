@@ -20,7 +20,7 @@ Shell scripts that backport OpenSSH from Debian sid to older Debian/Ubuntu distr
 
 ## Package versioning
 
-The distro codename is appended to the package version (`~${BUILD_CODENAME}`) during compile. The version is auto-detected from Debian sid and cannot be pinned — it always builds the latest.
+The distro codename is appended to the package version (`~${BUILD_CODENAME}`) during compile. The version is pinned via `OPENSSH_SIDPKG` in `version.env`; if that variable is empty, it falls back to auto-detecting the latest from Debian sid.
 
 ## Docker build
 
