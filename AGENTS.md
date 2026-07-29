@@ -41,10 +41,14 @@ docker build --build-arg BASE_IMAGE=ubuntu:noble -f docker/Dockerfile.deps -t <t
 
 When a new upstream version is built and released:
 
-1. Update the version number in `README.md` (e.g. `- OpenSSH 10.4p1-3`)
-2. Commit the change: `git add README.md && git commit -m "bump version to 10.4p1-3"`
-3. Tag the release: `git tag v10.4p1-3_b1` (prefix `v`, suffix `_b1` = build 1; increment for rebuilds)
-4. Push: `git push && git push --tags`
+1. Scrape the latest sid version to get the new value for `OPENSSH_SIDPKG`:
+   ```bash
+   wget -qO- http://deb.debian.org/debian/pool/main/o/openssh/ | grep -oP 'openssh_\K[0-9]+\.[0-9]+p[0-9]+-[0-9]+(?:~bpo[0-9]+(?:\+[0-9]+)?)?' | sort -V | tail -n 1
+   ```
+2. Update `OPENSSH_SIDPKG` in `version.env` and the `- OpenSSH ...` line in `README.md` with the new version.
+3. Commit the change: `git add README.md version.env && git commit -m "bump version to <new-version>"`
+4. Tag the release: `git tag v<new-version>_b1` (prefix `v`, suffix `_b1` = build 1; increment for rebuilds)
+5. Push: `git push && git push --tags`
 
 ## Known distro-specific quirks
 
