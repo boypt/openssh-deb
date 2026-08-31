@@ -3,7 +3,7 @@ name: Build and Push Dependency Images
 on:
   workflow_dispatch:
   push:
-    branches: [ main ]
+    branches: [ master ]
     paths:
       - 'install_deps.sh'
       - 'docker/Dockerfile.deps'
