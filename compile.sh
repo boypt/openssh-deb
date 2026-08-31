@@ -111,6 +111,39 @@ if ! dpkg -l libwtmpdb-dev; then
 	sed -i '/with-wtmpdb/d' debian/rules
 fi
 
+## libcrypt-dev does not exist on older distros (crypt.h ships in libc6-dev,
+## e.g. Ubuntu 18.04): drop it so dpkg-checkbuilddeps passes
+if ! dpkg -s libcrypt-dev >/dev/null 2>&1; then
+	sed -i '/libcrypt-dev/d' debian/control
+fi
+
+## sid packaging needs a dh-runit newer than old distros provide, and the
+## runit-helper dependency it generates is not installable there (e.g. Ubuntu
+## 18.04 only has runit-helper 2.7.1): strip the runit integration entirely
+__dh_runit_bd="$(grep -oP 'dh-runit \([^)]*\)' debian/control | head -n1 || true)"
+if [[ -n $__dh_runit_bd ]] && ! dpkg-checkbuilddeps -d "$__dh_runit_bd" /dev/null >/dev/null 2>&1; then
+	sed -i 's|dh $@ --with=runit|dh $@|' debian/rules
+	sed -i '/^override_dh_runit:/,+1d' debian/rules
+	sed -i '/dh-runit/d' debian/control
+	sed -i '/${runit:Breaks}/d' debian/control
+	rm -f debian/openssh-server.runit
+fi
+
+## named GIDs in sysusers.d (u sshd -:nogroup) need systemd >= 244; older
+## systemd silently fails to parse and the sshd privsep user is never created
+## (e.g. Ubuntu 18.04 ships systemd 237)
+__systemd_ver="$(apt-cache policy systemd 2>/dev/null | awk '/Candidate:/{print $2; exit}')"
+[[ -z $__systemd_ver || $__systemd_ver == "(none)" ]] && __systemd_ver=0
+if dpkg --compare-versions "$__systemd_ver" lt '244~'; then
+	sed -i -E 's/^(u [^ ]+) -:[^ ]+ /\1 - /' debian/*.sysusers
+fi
+
+## on non-merged-usr distros (e.g. Ubuntu 18.04) deb-systemd-helper only
+## searches /lib/systemd/system, so units must be installed there
+if [ ! -L /lib ]; then
+	sed -i 's|usr/lib/systemd/system|lib/systemd/system|g' debian/*.install
+fi
+
 ## fix init-system-helpers version require
 if dpkg --compare-versions $__initsystemhelpers_ver lt '1.66'; then
 	sed -i '/init-system-helpers/s|1.66|1.50|' debian/control

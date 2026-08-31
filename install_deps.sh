@@ -34,12 +34,17 @@ fi
 apt update
 apt upgrade -y
 apt install -y --no-install-recommends lsb-release wget sudo pkgconf build-essential fakeroot \
-	dpkg-dev debhelper debhelper-compat dh-exec dh-runit \
+	dpkg-dev debhelper debhelper-compat dh-exec dh-runit ca-certificates \
 	libaudit-dev libedit-dev libgtk-3-dev libselinux1-dev libsystemd-dev \
 	libkrb5-dev libpam0g-dev libwrap0-dev
 
 if [[ $(apt-cache search --names-only 'libfido2-dev' | wc -l) -gt 0 ]]; then
 	apt install -y libfido2-dev libcbor-dev
+fi
+
+# libcrypt-dev only exists on distros where libxcrypt was split out of libc
+if [[ $(apt-cache search --names-only 'libcrypt-dev' | wc -l) -gt 0 ]]; then
+	apt install -y libcrypt-dev
 fi
 
 
@@ -78,7 +83,45 @@ __debhelper_ver="$(dpkg-query -f '${Version}' -W debhelper || true)"
 echo "DEBUG: __debhelper_ver:$__debhelper_ver"
 if dpkg --compare-versions "$__debhelper_ver" lt '13.12~'; then
    # dh-sequence-movetousr was added to debhelper in 13.11.7
+
+   # debhelper 13.14 needs dwz >= 0.12.20190711, newer than some distros ship
+   # (Ubuntu 18.04 has 0.12-2): pull it from the distro backports pocket.
+   __dwz_ver="$(apt-cache policy dwz 2>/dev/null | awk '/Candidate:/{print $2; exit}')"
+   [[ -z $__dwz_ver || $__dwz_ver == "(none)" ]] && __dwz_ver=0
+   if dpkg --compare-versions "$__dwz_ver" lt '0.12.20190711'; then
+       apt install -y -t "$(lsb_release -sc)-backports" dwz
+   fi
+
    sudo apt install -y "$__dir"/builddep/*.deb
+
+   # debhelper 13.14 uses Perl >= 5.30 syntax (state vars in list context) and
+   # dh_missing declares v5.28; downgrade both for older perls (Ubuntu 18.04: 5.26).
+   __perl_ver="$(perl -MConfig -e 'print $Config{version}')"
+   if dpkg --compare-versions "$__perl_ver" lt '5.28'; then
+       sed -i -E 's/^(\s*)state\s+([%@][^=]+=)/\1my \2/; s/^(\s*)state\s+\(([^)]+)\)/\1my (\2)/' /usr/share/perl5/Debian/Debhelper/Dh_Lib.pm
+       sed -i 's/^use v5\.28;/use v5.26;/' /usr/bin/dh_missing
+   fi
+
+   # debhelper hardcodes versioned deps on init-system-helpers that old distros
+   # predate (Ubuntu 18.04: 1.51); the subcommands used are all supported there.
+   __ish_ver="$(apt-cache policy init-system-helpers 2>/dev/null | awk '/Candidate:/{print $2; exit}')"
+   [[ -z $__ish_ver || $__ish_ver == "(none)" ]] && __ish_ver=0
+   if dpkg --compare-versions "$__ish_ver" lt '1.52'; then
+       sed -i "s/\">= 1\.52\"/\">= $__ish_ver\"/; s/\">= 1\.66~\"/\">= $__ish_ver\"/" /usr/bin/dh_installsystemduser
+   fi
+   # invoke-rc.d only learned --skip-systemd-native in init-system-helpers 1.54;
+   # drop the option on older distros (dh_installinit then also omits its
+   # Pre-Depends on init-system-helpers (>= 1.54~) automatically).
+   if dpkg --compare-versions "$__ish_ver" lt '1.54~'; then
+       sed -i "s/compat(11) ? '' : '--skip-systemd-native '/''/" /usr/bin/dh_installinit
+   fi
+
+   # On non-merged-usr distros (e.g. Ubuntu 18.04) deb-systemd-helper only
+   # searches /lib/systemd/system, but debhelper 13.14 installs units to
+   # /usr/lib: keep units in /lib so services actually get enabled.
+   if [ ! -L /lib ]; then
+       sed -i 's|\$tmpdir/usr/lib/systemd/system|$tmpdir/lib/systemd/system|g' /usr/bin/dh_installsystemd
+   fi
 fi
 
 #CODE_NAME=$(lsb_release -sc)
