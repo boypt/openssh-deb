@@ -28,7 +28,7 @@ If your server OS is in the supported list, you can download and install them in
 
 ### Release supported OSs
 - Debian `bullseye(11)` / `bookworm(12)` / `trixie(13)` - `amd64`/`arm64`
-- Ubuntu  `focal(20.04)` / `jammy(22.04)` / `noble(24.04)` - `amd64`/`arm64`
+- Ubuntu  `bionic(18.04)` / `focal(20.04)` / `jammy(22.04)` / `noble(24.04)` - `amd64`/`arm64`
 
 ```bash
 sudo bash -c "$(curl -L https://github.com/boypt/openssh-deb/raw/master/lazy_install.sh)"
