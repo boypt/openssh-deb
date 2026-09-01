@@ -152,9 +152,6 @@ if dpkg --compare-versions $__initsystemhelpers_ver lt '1.66'; then
 	sed -i '/init-system-helpers/s|1.66|1.50|' debian/control
 fi
 
-## PATCH 10.4p1-1
-sed -i '/chmod +x debian\/openssh-tests/s|^|#|' debian/rules
-
 ## Check build deps
 if ! dpkg-checkbuilddeps; then
 	echo "The build dependencies are not met, run ./install_deps.sh first."
@@ -164,8 +161,9 @@ fi
 ## Adding distro codename to package names
 sed -i "1s|)|~${BUILD_CODENAME})|" debian/changelog
 
-## SKIP openssh-tests pkg
+## SKIP openssh-tests (10.4p1-1+): -N + guard chmod when package skipped
 sed -i "/^%:/iBUILD_PACKAGES += -Nopenssh-tests\n" debian/rules
+sed -i '/chmod +x debian\/openssh-tests/ { /|| true/! s/$/ || true/ }' debian/rules
 
 echo "INFO: Building Package: $(head -n1 debian/changelog)"
 
