@@ -4,12 +4,6 @@ ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 
 COPY --chmod=755 install_deps.sh /tmp/install_deps.sh
-COPY --chmod=755 switch_archive_sources.sh /tmp/switch_archive_sources.sh
 COPY builddep/ /tmp/builddep/
-
-# EOL Debian releases (e.g. buster) no longer exist on deb.debian.org;
-# switch to the official archive source before installing build deps.
-RUN /tmp/switch_archive_sources.sh && rm /tmp/switch_archive_sources.sh
-
-RUN cd /tmp && ./install_deps.sh \
-    && rm -rf /tmp/install_deps.sh /tmp/builddep
+# install_deps.sh handles EOL archive switching (buster unconditional, bullseye probed) and APT_MIRROR
+RUN cd /tmp && ./install_deps.sh && rm -rf /tmp/install_deps.sh /tmp/builddep

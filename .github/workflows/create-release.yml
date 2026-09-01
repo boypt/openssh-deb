@@ -57,7 +57,8 @@ jobs:
       - name: Install test with ${{ matrix.version }}
         run: |
           docker run --rm -v ${{ github.workspace }}:/work -w /work library/${{ matrix.version }} bash -c "
-            bash /work/switch_archive_sources.sh &&
+            # EOL archive fix via install_deps.sh --fix-apt-only
+            bash /work/install_deps.sh --fix-apt-only &&
             apt update -qq >/dev/null 2>&1 &&
             apt install -y --no-install-recommends ./output/*.deb && ssh -V"
 

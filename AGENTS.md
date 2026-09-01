@@ -4,7 +4,7 @@ Shell scripts that backport OpenSSH from Debian sid to older Debian/Ubuntu distr
 
 ## Build order (must be sequential)
 
-1. `./install_deps.sh` — install build dependencies via apt
+1. `./install_deps.sh` — fix EOL/mirror sources then install build dependencies via apt
 2. `./pullsrc.sh` — download OpenSSH sources from Debian sid pool into `downloads/`
 3. `./compile.sh` — build .deb packages into `output/`
 
@@ -15,7 +15,7 @@ Shell scripts that backport OpenSSH from Debian sid to older Debian/Ubuntu distr
 ## Key env vars
 
 - `FORCESSL=1` — force static OpenSSL linking even on distros with libssl >= 3.0
-- `APT_MIRROR` — substitute apt sources mirror (e.g. `mirrors.ustc.edu.cn`)
+- `APT_MIRROR` — substitute apt sources mirror (e.g. `mirrors.ustc.edu.cn`); also applied when switching EOL Debian sources to archive handling (archive.debian.org)
 - `DEB_BUILD_OPTIONS` and `DEB_BUILD_PROFILES` are set inside `compile.sh` to skip tests and udebs
 
 ## Package versioning
@@ -29,10 +29,7 @@ docker build --build-arg BASE_IMAGE=ubuntu:noble -f docker/Dockerfile.deps -t <t
 ```
 
 > **EOL distro sources**: For EOL Debian releases (e.g. buster) the default
-> `deb.debian.org` no longer serves the repository. Run
-> `switch_archive_sources.sh` inside the target image to switch sources to
-> `archive.debian.org` (adding the `-backports` pocket) before apt operations.
-> `docker/Dockerfile.deps` and the CI install-test step both invoke this script.
+> `deb.debian.org` no longer serves the repository. `install_deps.sh` now automatically switches EOL Debian sources to `archive.debian.org` (adding the `-backports` pocket) before apt operations; `switch_archive_sources.sh` has been removed; EOL handling (buster unconditional, bullseye probed via deb.debian.org Release check with fallback to archive.debian.org) is now fully inside `install_deps.sh`. `docker/Dockerfile.deps` and CI both invoke `install_deps.sh` directly.
 
 ## pullsrc on the host
 

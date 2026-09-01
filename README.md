@@ -72,7 +72,7 @@ docker builder prune
 
 <summary>Using a APT mirror or proxy inside docker</summary>
 
-using `-e` to set environment variables inside docker.
+using `-e` to set environment variables inside docker. `APT_MIRROR` is automatically applied together with EOL archive handling (switch to `archive.debian.org` when needed) inside `install_deps.sh`.
 
 ```bash
     docker run --rm -v "$(pwd):/work" -w /work \

@@ -17,19 +17,193 @@ __root="$(cd "$(dirname "${__dir}")" && pwd)" # <-- change this as it depends on
 
 export DEBIAN_FRONTEND=noninteractive
 
-if [[ -n "${APT_MIRROR:-}" ]]; then
-	if [[ -f /etc/apt/sources.list ]]; then
-		# Extract the hostname from the first 'deb' line and replace it
-		original_mirror=$(awk '/^deb/{print $2}' /etc/apt/sources.list | head -n1 | cut -d/ -f3)
-		sed -i "s|${original_mirror}|${APT_MIRROR}|" /etc/apt/sources.list
-		# Comment out the security update source to avoid potential issues from mixed mirror sources
-		sed -i "/security.ubuntu.com/s|^|#|" /etc/apt/sources.list
-	fi
+# ---------------------------------------------------------------------------
+# fix_apt_sources: unified APT source fixing
+# Order: fix EOL archives first, then apply APT_MIRROR.
+# If both are triggered, APT_MIRROR takes precedence but a warning is emitted.
+# ---------------------------------------------------------------------------
+# Global flag set by _fix_eol when EOL handling actually rewrote sources.
+_fix_apt_eol_fixed=0
 
-	if [[ -f /etc/apt/sources.list.d/debian.sources ]]; then
-		sed -i "s|deb.debian.org|${APT_MIRROR}|" /etc/apt/sources.list.d/debian.sources
-	fi
+fix_apt_sources() {
+    # --- EOL archive fixing (Debian only) ---
+    _fix_eol() {
+        # Only Debian needs archive switching; Ubuntu and others are unaffected.
+        if [[ ! -f /etc/os-release ]]; then
+            return 0
+        fi
+        # shellcheck disable=SC1091
+        . /etc/os-release
+        if [[ "${ID:-}" != "debian" ]]; then
+            return 0
+        fi
+
+        # EOL codenames that have been moved to archive.debian.org.
+        # buster is definitively EOL, bullseye just passed EOL (2026-09) and
+        # is in transitional state where archive may not yet be ready, so
+        # probing is required.
+        local EOL_CODENAMES=("buster" "bullseye")
+
+        local codename="${VERSION_CODENAME:-}"
+        local is_eol=0
+        local c
+        for c in "${EOL_CODENAMES[@]}"; do
+            if [[ "$c" == "$codename" ]]; then
+                is_eol=1
+                break
+            fi
+        done
+        if [[ "$is_eol" -ne 1 ]]; then
+            return 0
+        fi
+
+        echo "[fix-apt] EOL codename detected: ${codename} (ID=debian), switching to archive.debian.org..."
+
+        case "${codename}" in
+            buster)
+                # Legacy sources.list (buster default)
+                for f in /etc/apt/sources.list /etc/apt/sources.list.d/*.list; do
+                    [[ -f "$f" ]] || continue
+                    if grep -q "deb.debian.org" "$f" 2>/dev/null; then
+                        echo "[fix-apt]   $f: deb.debian.org -> archive.debian.org"
+                        sed -i 's|deb.debian.org|archive.debian.org|g' "$f"
+                    fi
+                    if grep -q "security.debian.org" "$f" 2>/dev/null; then
+                        echo "[fix-apt]   $f: security.debian.org -> archive.debian.org"
+                        sed -i 's|security.debian.org|archive.debian.org|g' "$f"
+                    fi
+                done
+                # DEB822 .sources (e.g. /etc/apt/sources.list.d/debian.sources)
+                for f in /etc/apt/sources.list.d/*.sources; do
+                    [[ -f "$f" ]] || continue
+                    if grep -q "deb.debian.org" "$f" 2>/dev/null; then
+                        echo "[fix-apt]   $f: deb.debian.org -> archive.debian.org (DEB822)"
+                        sed -i 's|deb.debian.org|archive.debian.org|g' "$f"
+                    fi
+                    if grep -q "security.debian.org" "$f" 2>/dev/null; then
+                        echo "[fix-apt]   $f: security.debian.org -> archive.debian.org (DEB822)"
+                        sed -i 's|security.debian.org|archive.debian.org|g' "$f"
+                    fi
+                done
+                # Append buster-backports if not already present (needed for dwz etc.)
+                if ! grep -q "${codename}-backports" /etc/apt/sources.list 2>/dev/null; then
+                    echo "[fix-apt]   adding ${codename}-backports to /etc/apt/sources.list"
+                    echo "deb http://archive.debian.org/debian ${codename}-backports main" >> /etc/apt/sources.list
+                else
+                    echo "[fix-apt]   ${codename}-backports already present, skipping"
+                fi
+                _fix_apt_eol_fixed=1
+                ;;
+            bullseye)
+                # Bullseye EOL transitional: probe official source first.
+                # If still reachable, keep official; if not reachable, switch to archive.
+                local _probe_ok=0
+                # Try both Release and InRelease with timeout 5, spider mode; suppress errexit
+                if wget -q --spider --timeout=5 "http://deb.debian.org/debian/dists/bullseye/Release" 2>/dev/null; then
+                    _probe_ok=1
+                elif wget -q --spider --timeout=5 "http://deb.debian.org/debian/dists/bullseye/InRelease" 2>/dev/null; then
+                    _probe_ok=1
+                fi
+                if [[ $_probe_ok -eq 1 ]]; then
+                    echo "[fix-apt] bullseye still served from deb.debian.org (probe succeeded), keeping official sources"
+                    # do NOT set _fix_apt_eol_fixed, remain on official
+                else
+                    echo "[fix-apt] bullseye official source not reachable (probe failed), switching to archive.debian.org..."
+                    # copy same sed logic as buster but for bullseye (legacy + DEB822 + backports)
+                    for f in /etc/apt/sources.list /etc/apt/sources.list.d/*.list; do
+                        [[ -f "$f" ]] || continue
+                        if grep -q "deb.debian.org" "$f" 2>/dev/null; then
+                            echo "[fix-apt]   $f: deb.debian.org -> archive.debian.org"
+                            sed -i 's|deb.debian.org|archive.debian.org|g' "$f"
+                        fi
+                        if grep -q "security.debian.org" "$f" 2>/dev/null; then
+                            echo "[fix-apt]   $f: security.debian.org -> archive.debian.org"
+                            sed -i 's|security.debian.org|archive.debian.org|g' "$f"
+                        fi
+                    done
+                    for f in /etc/apt/sources.list.d/*.sources; do
+                        [[ -f "$f" ]] || continue
+                        if grep -q "deb.debian.org" "$f" 2>/dev/null; then
+                            echo "[fix-apt]   $f: deb.debian.org -> archive.debian.org (DEB822)"
+                            sed -i 's|deb.debian.org|archive.debian.org|g' "$f"
+                        fi
+                        if grep -q "security.debian.org" "$f" 2>/dev/null; then
+                            echo "[fix-apt]   $f: security.debian.org -> archive.debian.org (DEB822)"
+                            sed -i 's|security.debian.org|archive.debian.org|g' "$f"
+                        fi
+                    done
+                    if ! grep -q "${codename}-backports" /etc/apt/sources.list 2>/dev/null; then
+                        echo "[fix-apt]   adding ${codename}-backports to /etc/apt/sources.list"
+                        echo "deb http://archive.debian.org/debian ${codename}-backports main" >> /etc/apt/sources.list
+                    else
+                        echo "[fix-apt]   ${codename}-backports already present, skipping"
+                    fi
+                    _fix_apt_eol_fixed=1
+                fi
+                ;;
+            *)
+                echo "[fix-apt] WARNING: EOL codename ${codename} matched but no handler defined"
+                ;;
+        esac
+    }
+
+    # --- APT_MIRROR handling ---
+    _apply_mirror() {
+        if [[ -z "${APT_MIRROR:-}" ]]; then
+            return 0
+        fi
+        echo "[fix-apt] applying APT_MIRROR=${APT_MIRROR} ..."
+
+        # Legacy list files: /etc/apt/sources.list and /etc/apt/sources.list.d/*.list
+        for f in /etc/apt/sources.list /etc/apt/sources.list.d/*.list; do
+            [[ -f "$f" ]] || continue
+            # Extract hostname from first deb line and replace it
+            local original_mirror
+            original_mirror=$(awk '/^deb /{print $2}' "$f" | head -n1 | cut -d/ -f3)
+            if [[ -n "${original_mirror:-}" ]]; then
+                echo "[fix-apt]   $f: replacing host ${original_mirror} -> ${APT_MIRROR}"
+                sed -i "s|${original_mirror}|${APT_MIRROR}|g" "$f"
+            fi
+            # Comment out security.ubuntu.com to avoid mixed-mirror issues (Ubuntu only)
+            if grep -q "security.ubuntu.com" "$f" 2>/dev/null; then
+                echo "[fix-apt]   $f: commenting security.ubuntu.com"
+                sed -i "/security.ubuntu.com/s|^|#|" "$f"
+            fi
+        done
+
+        # DEB822 .sources files: replace deb.debian.org hostname with mirror
+        for f in /etc/apt/sources.list.d/*.sources; do
+            [[ -f "$f" ]] || continue
+            if grep -q "deb.debian.org" "$f" 2>/dev/null; then
+                echo "[fix-apt]   $f: deb.debian.org -> ${APT_MIRROR} (DEB822)"
+                sed -i "s|deb.debian.org|${APT_MIRROR}|g" "$f"
+            fi
+        done
+    }
+
+    _fix_eol
+    _apply_mirror
+
+    if [[ "${_fix_apt_eol_fixed}" -eq 1 && -n "${APT_MIRROR:-}" ]]; then
+        echo "[fix-apt] WARNING: EOL archive fix was applied but APT_MIRROR=${APT_MIRROR} overrides archive.debian.org; you are responsible for ensuring the mirror provides the archive path."
+    fi
+}
+
+# Parse --fix-apt-only before any heavy work.
+# When set, only fix apt sources and exit 0 (lightweight CI install-test).
+FIX_APT_ONLY=0
+if [[ "${1:-}" == "--fix-apt-only" ]]; then
+    FIX_APT_ONLY=1
 fi
+
+if [[ "$FIX_APT_ONLY" -eq 1 ]]; then
+    fix_apt_sources
+    echo "[fix-apt] --fix-apt-only: done, exiting 0"
+    exit 0
+fi
+
+# Normal flow: fix sources then continue with dependency installation
+fix_apt_sources
 
 apt update
 apt upgrade -y
