@@ -39,9 +39,13 @@ fix_apt_sources() {
         fi
 
         # EOL codenames that have been moved to archive.debian.org.
-        # buster is definitively EOL, bullseye just passed EOL (2026-09) and
-        # is in transitional state where archive may not yet be ready, so
-        # probing is required.
+        # buster is definitively EOL (unconditionally switched to archive).
+        # bullseye just passed EOL (2026-09) and is in transitional state:
+        #   - archive.debian.org may not yet carry bullseye-security (404),
+        #     so security must stay on official until archive is ready;
+        #   - CI build containers may lack wget/curl or have transient network
+        #     issues, so probing uses wget→curl→python3 fallback and checks
+        #     both Release and InRelease.
         local EOL_CODENAMES=("buster" "bullseye")
 
         local codename="${VERSION_CODENAME:-}"
@@ -95,13 +99,55 @@ fix_apt_sources() {
                 _fix_apt_eol_fixed=1
                 ;;
             bullseye)
-                # Bullseye EOL transitional: probe official source first.
-                # If still reachable, keep official; if not reachable, switch to archive.
+                # Bullseye EOL transitional: probe official source first with
+                # robust fallback (wget→curl→python3). If official still
+                # reachable, keep it; otherwise switch main to archive but
+                # keep security on official until archive actually carries
+                # bullseye-security (avoids 404 on archive.debian.org).
+                _probe_url() {
+                    local _pu_url="$1"
+                    # 1) wget (spider, timeout 5)
+                    if command -v wget >/dev/null 2>&1; then
+                        if wget -q --spider --timeout=5 "$_pu_url" 2>/dev/null; then
+                            return 0
+                        fi
+                    fi
+                    # 2) curl (follow redirects, timeout 5)
+                    if command -v curl >/dev/null 2>&1; then
+                        if curl -fsI --max-time 5 -L "$_pu_url" >/dev/null 2>&1; then
+                            return 0
+                        fi
+                        if curl -fsI --max-time 5 "$_pu_url" >/dev/null 2>&1; then
+                            return 0
+                        fi
+                    fi
+                    # 3) python3 urllib (HEAD with GET fallback, timeout 5)
+                    if command -v python3 >/dev/null 2>&1; then
+                        if python3 -c 'import sys, urllib.request, ssl
+url=sys.argv[1]
+try:
+    ctx=ssl._create_unverified_context()
+except Exception:
+    ctx=None
+try:
+    req=urllib.request.Request(url, method="HEAD")
+    with urllib.request.urlopen(req, timeout=5, context=ctx) as r:
+        sys.exit(0 if r.status < 400 else 1)
+except Exception:
+    try:
+        req=urllib.request.Request(url, method="GET")
+        with urllib.request.urlopen(req, timeout=5, context=ctx) as r:
+            sys.exit(0 if r.status < 400 else 1)
+    except Exception:
+        sys.exit(1)
+' "$_pu_url" 2>/dev/null; then
+                            return 0
+                        fi
+                    fi
+                    return 1
+                }
                 local _probe_ok=0
-                # Try both Release and InRelease with timeout 5, spider mode; suppress errexit
-                if wget -q --spider --timeout=5 "http://deb.debian.org/debian/dists/bullseye/Release" 2>/dev/null; then
-                    _probe_ok=1
-                elif wget -q --spider --timeout=5 "http://deb.debian.org/debian/dists/bullseye/InRelease" 2>/dev/null; then
+                if _probe_url "http://deb.debian.org/debian/dists/bullseye/Release" 2>/dev/null || _probe_url "http://deb.debian.org/debian/dists/bullseye/InRelease" 2>/dev/null; then
                     _probe_ok=1
                 fi
                 if [[ $_probe_ok -eq 1 ]]; then
@@ -109,7 +155,7 @@ fix_apt_sources() {
                     # do NOT set _fix_apt_eol_fixed, remain on official
                 else
                     echo "[fix-apt] bullseye official source not reachable (probe failed), switching to archive.debian.org..."
-                    # copy same sed logic as buster but for bullseye (legacy + DEB822 + backports)
+                    # switch main and security to archive initially (same as buster)
                     for f in /etc/apt/sources.list /etc/apt/sources.list.d/*.list; do
                         [[ -f "$f" ]] || continue
                         if grep -q "deb.debian.org" "$f" 2>/dev/null; then
@@ -132,6 +178,27 @@ fix_apt_sources() {
                             sed -i 's|security.debian.org|archive.debian.org|g' "$f"
                         fi
                     done
+                    # verify archive security actually exists; if 404, revert
+                    # security to official (keeps bullseye/bullseye-updates/backports on archive)
+                    local _archive_sec_ok=0
+                    if _probe_url "http://archive.debian.org/debian-security/dists/bullseye-security/Release" 2>/dev/null || _probe_url "http://archive.debian.org/debian-security/dists/bullseye-security/InRelease" 2>/dev/null; then
+                        _archive_sec_ok=1
+                    fi
+                    if [[ $_archive_sec_ok -eq 0 ]]; then
+                        echo "[fix-apt]   archive security not ready, keeping security on deb.debian.org"
+                        for f in /etc/apt/sources.list /etc/apt/sources.list.d/*.list; do
+                            [[ -f "$f" ]] || continue
+                            if grep -q "archive.debian.org/debian-security" "$f" 2>/dev/null; then
+                                sed -i 's|archive.debian.org/debian-security|deb.debian.org/debian-security|g' "$f"
+                            fi
+                        done
+                        for f in /etc/apt/sources.list.d/*.sources; do
+                            [[ -f "$f" ]] || continue
+                            if grep -q "archive.debian.org/debian-security" "$f" 2>/dev/null; then
+                                sed -i 's|archive.debian.org/debian-security|deb.debian.org/debian-security|g' "$f"
+                            fi
+                        done
+                    fi
                     if ! grep -q "${codename}-backports" /etc/apt/sources.list 2>/dev/null; then
                         echo "[fix-apt]   adding ${codename}-backports to /etc/apt/sources.list"
                         echo "deb http://archive.debian.org/debian ${codename}-backports main" >> /etc/apt/sources.list
