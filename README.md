@@ -43,11 +43,11 @@ sudo bash -c "$(curl -L https://gh-proxy.com/github.com/boypt/openssh-deb/raw/ma
 ## Direct Build
 
 ```bash
+# pull source (also fetches sid debhelper .debs into builddep/ for old distros)
+./pullsrc.sh
+
 # Install Dependencies
 ./install_deps.sh
-
-# pull source
-./pullsrc.sh
 
 # direct build
 ./compile.sh

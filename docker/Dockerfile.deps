@@ -1,9 +1,11 @@
 # Dep image
 #   docker build --build-arg BASE_IMAGE=ubuntu:noble -f docker/Dockerfile.deps -t xxx .
+# Requires `./pullsrc.sh debhelper` on the host first (populates builddep/).
+# BuildKit bind mounts keep install_deps.sh and the .debs out of image layers.
 ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 
-COPY --chmod=755 install_deps.sh /tmp/install_deps.sh
-COPY builddep/ /tmp/builddep/
 # install_deps.sh handles EOL archive switching (buster unconditional, bullseye probed) and APT_MIRROR
-RUN cd /tmp && ./install_deps.sh && rm -rf /tmp/install_deps.sh /tmp/builddep
+RUN --mount=type=bind,source=install_deps.sh,target=/tmp/install_deps.sh \
+	--mount=type=bind,source=builddep,target=/tmp/builddep \
+	cd /tmp && bash ./install_deps.sh

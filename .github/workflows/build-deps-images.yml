@@ -30,6 +30,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
+      - name: Fetch debhelper .debs into build context
+        run: ./pullsrc.sh debhelper
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 

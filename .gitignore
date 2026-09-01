@@ -1,5 +1,6 @@
 build/
 downloads/
+builddep/
 *.swp
 *.tar.gz
 *.deb
