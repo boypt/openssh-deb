@@ -6,6 +6,7 @@ on:
     branches: [ master ]
     paths:
       - 'install_deps.sh'
+      - 'switch_archive_sources.sh'
       - 'docker/Dockerfile.deps'
 
 env:
