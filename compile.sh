@@ -48,8 +48,7 @@ BUILD_CODENAME=$(lsb_release -sc)
 SOURCES=(
 	openssh_${OPENSSH_SIDPKG}.debian.tar.xz \
 	openssh_${OPENSSH_SIDPKG}.dsc \
-	openssh_${OPENSSHVER}.orig.tar.gz \
-	openssh_${OPENSSHVER}.orig.tar.gz.asc \
+	openssh_${OPENSSHVER}.orig.tar.xz \
 )
 
 echo "-- Build OpenSSH : ${OPENSSH_SIDPKG}"
@@ -67,8 +66,12 @@ CHECKEXISTS() {
   fi
 }
 
-for fn in ${SOURCES[@]}; do
-  CHECKEXISTS $fn 
+for fn in "${SOURCES[@]}"; do
+  # compat: allow .orig.tar.gz for old versions (e.g. 10.4) if .xz not present
+  if [[ "$fn" == *.orig.tar.xz ]] && [[ ! -f "$__dir/downloads/$fn" ]] && compgen -G "$__dir/downloads/openssh_${OPENSSHVER}.orig.tar.*" > /dev/null; then
+    continue
+  fi
+  CHECKEXISTS "$fn"
 done
 
 cd $__dir

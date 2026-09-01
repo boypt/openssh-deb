@@ -39,9 +39,16 @@ fi
 
 DOWNLOADLINKS=(
 	$DEBMIRROR/pool/main/o/openssh/openssh_${OPENSSH_SIDPKG}.{debian.tar.xz,dsc}
-	$DEBMIRROR/pool/main/o/openssh/openssh_${OPENSSHVER}.orig.tar.gz{,.asc}
-	${OPENSSLMIR}/${OPENSSLSRC}
 )
+# Dynamic orig detection: parse .dsc for actual orig filename(s) to handle gz→xz switch (10.5p1+ uses .xz, no .asc)
+DSC_URL=$DEBMIRROR/pool/main/o/openssh/openssh_${OPENSSH_SIDPKG}.dsc
+ORIG_FILES=$(wget -qO- "$DSC_URL" 2>/dev/null | awk '/^ [0-9a-f]+ [0-9]+ openssh.*\.orig\./{print $3}' | sort -u || true)
+if [[ -n "$ORIG_FILES" ]]; then
+	for f in $ORIG_FILES; do DOWNLOADLINKS+=("$DEBMIRROR/pool/main/o/openssh/$f"); done
+else
+	DOWNLOADLINKS+=("$DEBMIRROR/pool/main/o/openssh/openssh_${OPENSSHVER}.orig.tar.xz")
+fi
+DOWNLOADLINKS+=("${OPENSSLMIR}/${OPENSSLSRC}")
 
 mkdir -p $__dir/downloads $__dir/builddep && cd $__dir/downloads
 echo "> INFO: downloading the following sources."
