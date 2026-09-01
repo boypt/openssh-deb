@@ -56,7 +56,10 @@ jobs:
 
       - name: Install test with ${{ matrix.version }}
         run: |
-          docker run --rm -v ${{ github.workspace }}:/work -w /work library/${{ matrix.version }} bash -c "apt update && apt install -y --no-install-recommends ./output/*.deb && ssh -V"
+          docker run --rm -v ${{ github.workspace }}:/work -w /work library/${{ matrix.version }} bash -c "
+            bash /work/switch_archive_sources.sh &&
+            apt update -qq >/dev/null 2>&1 &&
+            apt install -y --no-install-recommends ./output/*.deb && ssh -V"
 
       - name: Pack .deb files into tar.gz
         id: pack

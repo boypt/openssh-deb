@@ -28,6 +28,25 @@ The distro codename is appended to the package version (`~${BUILD_CODENAME}`) du
 docker build --build-arg BASE_IMAGE=ubuntu:noble -f docker/Dockerfile.deps -t <tag> .
 ```
 
+> **EOL distro sources**: For EOL Debian releases (e.g. buster) the default
+> `deb.debian.org` no longer serves the repository. Run
+> `switch_archive_sources.sh` inside the target image to switch sources to
+> `archive.debian.org` (adding the `-backports` pocket) before apt operations.
+> `docker/Dockerfile.deps` and the CI install-test step both invoke this script.
+
+## pullsrc on the host
+
+Old distros often ship old `ca-certificates` (or none in minimal images),
+which can no longer verify GitHub's TLS chain. The release CI avoids this
+by running `./pullsrc.sh` on the host runner (current CA store), then
+mounting the repository into the build container with `-v`. When building
+manually for an old distro, apply the same pattern:
+
+```bash
+./pullsrc.sh
+docker run --rm -v "$(pwd):/work" -w /work debian:buster bash -c "./install_deps.sh && ./compile.sh"
+```
+
 ## Directories
 
 | Directory    | Purpose                                  |
