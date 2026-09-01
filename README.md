@@ -16,7 +16,7 @@ Current version (CI Build version): (script follows `debian/sid` automatically)
 ### Supported (tested) Distro:
 
 - Ubuntu 24.04/22.04/20.04/18.04
-- Debian 13/trixie 12/bookworm 11/bullseye
+- Debian 13/trixie 12/bookworm 11/bullseye 10/buster
 - UnionTech OS Desktop 20 Home (Debian GLIBC 2.28.21-1+deepin-1) 
 - Kylin V10 SP1 (Ubuntu GLIBC 2.31-0kylin9.2k0.1)
 
@@ -27,7 +27,7 @@ Github Action builds common distro DEBs.
 If your server OS is in the supported list, you can download and install them in the server.
 
 ### Release supported OSs
-- Debian `bullseye(11)` / `bookworm(12)` / `trixie(13)` - `amd64`/`arm64`
+- Debian `buster(10)` / `bullseye(11)` / `bookworm(12)` / `trixie(13)` - `amd64`/`arm64`
 - Ubuntu  `bionic(18.04)` / `focal(20.04)` / `jammy(22.04)` / `noble(24.04)` - `amd64`/`arm64`
 
 ```bash
