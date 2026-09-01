@@ -38,7 +38,11 @@ apt install -y --no-install-recommends lsb-release wget sudo pkgconf build-essen
 	libaudit-dev libedit-dev libgtk-3-dev libselinux1-dev libsystemd-dev \
 	libkrb5-dev libpam0g-dev libwrap0-dev
 
-if [[ $(apt-cache search --names-only 'libfido2-dev' | wc -l) -gt 0 ]]; then
+# Only install libfido2-dev when it is available in the default archive
+# (priority 500). If it only exists in backports (priority 100, e.g. Debian 10
+# buster), building against it would produce a libfido2-1 runtime dependency
+# that a stock target system cannot satisfy.
+if [[ $(apt-cache policy libfido2-dev 2>/dev/null | grep -cE ' 500$') -gt 0 ]]; then
 	apt install -y libfido2-dev libcbor-dev
 fi
 
