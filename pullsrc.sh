@@ -46,7 +46,63 @@ ORIG_FILES=$(wget -qO- "$DSC_URL" 2>/dev/null | awk '/^ [0-9a-f]+ [0-9]+ openssh
 if [[ -n "$ORIG_FILES" ]]; then
 	for f in $ORIG_FILES; do DOWNLOADLINKS+=("$DEBMIRROR/pool/main/o/openssh/$f"); done
 else
-	DOWNLOADLINKS+=("$DEBMIRROR/pool/main/o/openssh/openssh_${OPENSSHVER}.orig.tar.xz")
+	# Fallback when .dsc parsing fails (network hiccup or format change):
+	# probe xz→gz in order, only add the first URL that actually exists (200).
+	# Reuse the wget→curl→python3 probe from install_deps.sh (timeout 5) so
+	# minimal containers without wget/curl still work; keep it inside `if`
+	# so `set -e` / `trap ERR` is not triggered on 404/offline.
+	CANDIDATES=("openssh_${OPENSSHVER}.orig.tar.xz" "openssh_${OPENSSHVER}.orig.tar.gz")
+	_probe_url() {
+		local _pu_url="$1"
+		if command -v wget >/dev/null 2>&1; then
+			if wget -q --spider --timeout=5 "$_pu_url" 2>/dev/null; then
+				return 0
+			fi
+		fi
+		if command -v curl >/dev/null 2>&1; then
+			if curl -fsI --max-time 5 -L "$_pu_url" >/dev/null 2>&1; then
+				return 0
+			fi
+			if curl -fsI --max-time 5 "$_pu_url" >/dev/null 2>&1; then
+				return 0
+			fi
+		fi
+		if command -v python3 >/dev/null 2>&1; then
+			if python3 -c 'import sys, urllib.request, ssl
+url=sys.argv[1]
+try:
+    ctx=ssl._create_unverified_context()
+except Exception:
+    ctx=None
+try:
+    req=urllib.request.Request(url, method="HEAD")
+    with urllib.request.urlopen(req, timeout=5, context=ctx) as r:
+        sys.exit(0 if r.status < 400 else 1)
+except Exception:
+    try:
+        req=urllib.request.Request(url, method="GET")
+        with urllib.request.urlopen(req, timeout=5, context=ctx) as r:
+            sys.exit(0 if r.status < 400 else 1)
+    except Exception:
+        sys.exit(1)
+' "$_pu_url" 2>/dev/null; then
+				return 0
+			fi
+		fi
+		return 1
+	}
+	_found=0
+	for cand in "${CANDIDATES[@]}"; do
+		if _probe_url "$DEBMIRROR/pool/main/o/openssh/$cand"; then
+			DOWNLOADLINKS+=("$DEBMIRROR/pool/main/o/openssh/$cand")
+			_found=1
+			break
+		fi
+	done
+	if [[ $_found -eq 0 ]]; then
+		# offline or both 404: keep one attempt so wget error is explicit via trap ERR
+		DOWNLOADLINKS+=("$DEBMIRROR/pool/main/o/openssh/openssh_${OPENSSHVER}.orig.tar.xz")
+	fi
 fi
 DOWNLOADLINKS+=("${OPENSSLMIR}/${OPENSSLSRC}")
 
