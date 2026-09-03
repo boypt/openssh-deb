@@ -29,73 +29,44 @@ fix_apt_sources() {
     # --- EOL archive fixing (Debian only) ---
     _fix_eol() {
         # Only Debian needs archive switching; Ubuntu and others are unaffected.
-        if [[ ! -f /etc/os-release ]]; then
-            return 0
-        fi
+        [[ -f /etc/os-release ]] || return 0
         # shellcheck disable=SC1091
         . /etc/os-release
-        if [[ "${ID:-}" != "debian" ]]; then
-            return 0
-        fi
-
-        # EOL codenames that have been moved to archive.debian.org.
-        # buster is definitively EOL (unconditionally switched to archive).
-        # bullseye just passed EOL (2026-09) and is in transitional state:
-        #   - archive.debian.org may not yet carry bullseye-security (404),
-        #     so security must stay on official until archive is ready;
-        #   - CI build containers may lack wget/curl or have transient network
-        #     issues, so probing uses wget→curl→python3 fallback and checks
-        #     both Release and InRelease.
-        local EOL_CODENAMES=("buster" "bullseye")
+        [[ "${ID:-}" == "debian" ]] || return 0
 
         local codename="${VERSION_CODENAME:-}"
-        local is_eol=0
-        local c
-        for c in "${EOL_CODENAMES[@]}"; do
-            if [[ "$c" == "$codename" ]]; then
-                is_eol=1
-                break
-            fi
-        done
-        if [[ "$is_eol" -ne 1 ]]; then
-            return 0
-        fi
 
-        echo "[fix-apt] EOL codename detected: ${codename} (ID=debian), switching to archive.debian.org..."
+        # Rewrite deb.debian.org / security.debian.org -> archive.debian.org
+        # in both legacy .list and DEB822 .sources files.
+        _switch_to_archive() {
+            local f
+            for f in /etc/apt/sources.list /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources; do
+                [[ -f "$f" ]] || continue
+                if grep -q "deb\.debian\.org\|security\.debian\.org" "$f" 2>/dev/null; then
+                    echo "[fix-apt]   $f: switching to archive.debian.org"
+                    sed -i 's|deb\.debian\.org|archive.debian.org|g; s|security\.debian\.org|archive.debian.org|g' "$f"
+                fi
+            done
+        }
+
+        # Append ${codename}-backports if not already present (needed for dwz etc.)
+        _add_backports() {
+            if ! grep -q "${codename}-backports" /etc/apt/sources.list 2>/dev/null; then
+                echo "[fix-apt]   adding ${codename}-backports to /etc/apt/sources.list"
+                echo "deb http://archive.debian.org/debian ${codename}-backports main" >> /etc/apt/sources.list
+            else
+                echo "[fix-apt]   ${codename}-backports already present, skipping"
+            fi
+        }
 
         case "${codename}" in
             buster)
-                # Legacy sources.list (buster default)
-                for f in /etc/apt/sources.list /etc/apt/sources.list.d/*.list; do
-                    [[ -f "$f" ]] || continue
-                    if grep -q "deb.debian.org" "$f" 2>/dev/null; then
-                        echo "[fix-apt]   $f: deb.debian.org -> archive.debian.org"
-                        sed -i 's|deb.debian.org|archive.debian.org|g' "$f"
-                    fi
-                    if grep -q "security.debian.org" "$f" 2>/dev/null; then
-                        echo "[fix-apt]   $f: security.debian.org -> archive.debian.org"
-                        sed -i 's|security.debian.org|archive.debian.org|g' "$f"
-                    fi
-                done
-                # DEB822 .sources (e.g. /etc/apt/sources.list.d/debian.sources)
-                for f in /etc/apt/sources.list.d/*.sources; do
-                    [[ -f "$f" ]] || continue
-                    if grep -q "deb.debian.org" "$f" 2>/dev/null; then
-                        echo "[fix-apt]   $f: deb.debian.org -> archive.debian.org (DEB822)"
-                        sed -i 's|deb.debian.org|archive.debian.org|g' "$f"
-                    fi
-                    if grep -q "security.debian.org" "$f" 2>/dev/null; then
-                        echo "[fix-apt]   $f: security.debian.org -> archive.debian.org (DEB822)"
-                        sed -i 's|security.debian.org|archive.debian.org|g' "$f"
-                    fi
-                done
-                # Append buster-backports if not already present (needed for dwz etc.)
-                if ! grep -q "${codename}-backports" /etc/apt/sources.list 2>/dev/null; then
-                    echo "[fix-apt]   adding ${codename}-backports to /etc/apt/sources.list"
-                    echo "deb http://archive.debian.org/debian ${codename}-backports main" >> /etc/apt/sources.list
-                else
-                    echo "[fix-apt]   ${codename}-backports already present, skipping"
-                fi
+                # buster is fully archived: main, updates, backports and
+                # security (buster/updates) are all on archive.debian.org, so
+                # switch unconditionally - no probing needed.
+                echo "[fix-apt] EOL codename detected: ${codename} (ID=debian), switching to archive.debian.org..."
+                _switch_to_archive
+                _add_backports
                 _fix_apt_eol_fixed=1
                 ;;
             bullseye)
@@ -155,29 +126,7 @@ except Exception:
                     # do NOT set _fix_apt_eol_fixed, remain on official
                 else
                     echo "[fix-apt] bullseye official source not reachable (probe failed), switching to archive.debian.org..."
-                    # switch main and security to archive initially (same as buster)
-                    for f in /etc/apt/sources.list /etc/apt/sources.list.d/*.list; do
-                        [[ -f "$f" ]] || continue
-                        if grep -q "deb.debian.org" "$f" 2>/dev/null; then
-                            echo "[fix-apt]   $f: deb.debian.org -> archive.debian.org"
-                            sed -i 's|deb.debian.org|archive.debian.org|g' "$f"
-                        fi
-                        if grep -q "security.debian.org" "$f" 2>/dev/null; then
-                            echo "[fix-apt]   $f: security.debian.org -> archive.debian.org"
-                            sed -i 's|security.debian.org|archive.debian.org|g' "$f"
-                        fi
-                    done
-                    for f in /etc/apt/sources.list.d/*.sources; do
-                        [[ -f "$f" ]] || continue
-                        if grep -q "deb.debian.org" "$f" 2>/dev/null; then
-                            echo "[fix-apt]   $f: deb.debian.org -> archive.debian.org (DEB822)"
-                            sed -i 's|deb.debian.org|archive.debian.org|g' "$f"
-                        fi
-                        if grep -q "security.debian.org" "$f" 2>/dev/null; then
-                            echo "[fix-apt]   $f: security.debian.org -> archive.debian.org (DEB822)"
-                            sed -i 's|security.debian.org|archive.debian.org|g' "$f"
-                        fi
-                    done
+                    _switch_to_archive
                     # verify archive security actually exists; if 404, revert
                     # security to official (keeps bullseye/bullseye-updates/backports on archive)
                     local _archive_sec_ok=0
@@ -186,30 +135,20 @@ except Exception:
                     fi
                     if [[ $_archive_sec_ok -eq 0 ]]; then
                         echo "[fix-apt]   archive security not ready, keeping security on deb.debian.org"
-                        for f in /etc/apt/sources.list /etc/apt/sources.list.d/*.list; do
+                        local f
+                        for f in /etc/apt/sources.list /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources; do
                             [[ -f "$f" ]] || continue
-                            if grep -q "archive.debian.org/debian-security" "$f" 2>/dev/null; then
-                                sed -i 's|archive.debian.org/debian-security|deb.debian.org/debian-security|g' "$f"
-                            fi
-                        done
-                        for f in /etc/apt/sources.list.d/*.sources; do
-                            [[ -f "$f" ]] || continue
-                            if grep -q "archive.debian.org/debian-security" "$f" 2>/dev/null; then
-                                sed -i 's|archive.debian.org/debian-security|deb.debian.org/debian-security|g' "$f"
+                            if grep -q "archive\.debian\.org/debian-security" "$f" 2>/dev/null; then
+                                sed -i 's|archive\.debian\.org/debian-security|deb.debian.org/debian-security|g' "$f"
                             fi
                         done
                     fi
-                    if ! grep -q "${codename}-backports" /etc/apt/sources.list 2>/dev/null; then
-                        echo "[fix-apt]   adding ${codename}-backports to /etc/apt/sources.list"
-                        echo "deb http://archive.debian.org/debian ${codename}-backports main" >> /etc/apt/sources.list
-                    else
-                        echo "[fix-apt]   ${codename}-backports already present, skipping"
-                    fi
+                    _add_backports
                     _fix_apt_eol_fixed=1
                 fi
                 ;;
             *)
-                echo "[fix-apt] WARNING: EOL codename ${codename} matched but no handler defined"
+                # Not an EOL codename - nothing to do.
                 ;;
         esac
     }
