@@ -209,7 +209,6 @@ fi
 # dependency churn make that fragile on old distros.
 __debhelper_ver="$(dpkg-query -f '${Version}' -W debhelper || true)"
 [[ -z $__debhelper_ver ]] && __debhelper_ver="0.0.0"
-echo "DEBUG: __debhelper_ver:$__debhelper_ver"
 if dpkg --compare-versions "$__debhelper_ver" lt '13.12~'; then
    if ! ls "$__dir"/builddep/debhelper_*_all.deb >/dev/null 2>&1; then
        echo "ERROR: builddep/debhelper_*.deb missing. Run ./pullsrc.sh on the host first (it downloads them into builddep/)." >&2
@@ -232,7 +231,6 @@ if dpkg --compare-versions "$__debhelper_ver" lt '13.12~'; then
    # `cp -an` at these two Dh_Lib.pm call sites until 13.26), so rewrite it.
    __coreutils_ver="$(dpkg-query -f '${Version}' -W coreutils || true)"
    [[ -z $__coreutils_ver ]] && __coreutils_ver="0.0.0"
-   echo "DEBUG: __coreutils_ver:$__coreutils_ver"
    if dpkg --compare-versions "$__coreutils_ver" lt '9.3~'; then
        sed -i "s/'--update=none'/'-n'/g" /usr/share/perl5/Debian/Debhelper/Dh_Lib.pm
    fi
