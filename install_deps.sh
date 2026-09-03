@@ -70,50 +70,20 @@ fix_apt_sources() {
                 _fix_apt_eol_fixed=1
                 ;;
             bullseye)
-                # Bullseye EOL transitional: probe official source first with
-                # robust fallback (wget→curl→python3). If official still
-                # reachable, keep it; otherwise switch main to archive but
-                # keep security on official until archive actually carries
-                # bullseye-security (avoids 404 on archive.debian.org).
+                # Bullseye EOL transitional: probe official source first
+                # (wget→curl). If official still reachable, keep it;
+                # otherwise switch main to archive but keep security on
+                # official until archive actually carries bullseye-security
+                # (avoids 404 on archive.debian.org).
                 _probe_url() {
                     local _pu_url="$1"
                     # 1) wget (spider, timeout 5)
-                    if command -v wget >/dev/null 2>&1; then
-                        if wget -q --spider --timeout=5 "$_pu_url" 2>/dev/null; then
-                            return 0
-                        fi
+                    if command -v wget >/dev/null 2>&1 && wget -q --spider --timeout=5 "$_pu_url" 2>/dev/null; then
+                        return 0
                     fi
                     # 2) curl (follow redirects, timeout 5)
-                    if command -v curl >/dev/null 2>&1; then
-                        if curl -fsI --max-time 5 -L "$_pu_url" >/dev/null 2>&1; then
-                            return 0
-                        fi
-                        if curl -fsI --max-time 5 "$_pu_url" >/dev/null 2>&1; then
-                            return 0
-                        fi
-                    fi
-                    # 3) python3 urllib (HEAD with GET fallback, timeout 5)
-                    if command -v python3 >/dev/null 2>&1; then
-                        if python3 -c 'import sys, urllib.request, ssl
-url=sys.argv[1]
-try:
-    ctx=ssl._create_unverified_context()
-except Exception:
-    ctx=None
-try:
-    req=urllib.request.Request(url, method="HEAD")
-    with urllib.request.urlopen(req, timeout=5, context=ctx) as r:
-        sys.exit(0 if r.status < 400 else 1)
-except Exception:
-    try:
-        req=urllib.request.Request(url, method="GET")
-        with urllib.request.urlopen(req, timeout=5, context=ctx) as r:
-            sys.exit(0 if r.status < 400 else 1)
-    except Exception:
-        sys.exit(1)
-' "$_pu_url" 2>/dev/null; then
-                            return 0
-                        fi
+                    if command -v curl >/dev/null 2>&1 && curl -fsI --max-time 5 -L "$_pu_url" >/dev/null 2>&1; then
+                        return 0
                     fi
                     return 1
                 }
