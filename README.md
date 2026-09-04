@@ -58,6 +58,8 @@ sudo bash -c "$(curl -L https://gh-proxy.com/github.com/boypt/openssh-deb/raw/ma
 
 The script detects your codename and architecture, downloads the matching release tarball from the [latest GitHub Release](https://github.com/boypt/openssh-deb/releases/latest), and installs it with `apt`.
 
+> To revert to the distro-provided OpenSSH later, see [Rolling Back to the Distro Default](#rolling-back-to-the-distro-default).
+
 ---
 
 ## Build from Source
