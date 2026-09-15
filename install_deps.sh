@@ -18,6 +18,22 @@ __root="$(cd "$(dirname "${__dir}")" && pwd)" # <-- change this as it depends on
 export DEBIAN_FRONTEND=noninteractive
 
 # ---------------------------------------------------------------------------
+# _apt_candidate_version: get a package's candidate version string, or ""
+#
+# Deliberately does NOT use `awk '{print; exit}'` / `head -n1` to short-
+# circuit the pipe. Under `set -o pipefail`, closing the read end early
+# causes the upstream command (apt-cache policy) to receive SIGPIPE on its
+# next write and exit 141; pipefail then reports 141 for the whole pipeline
+# even though the value was captured correctly, which trips `errexit` via
+# the ERR trap. Letting awk consume the full (small) stream avoids that
+# failure mode entirely rather than papering over it with `|| true`.
+# ---------------------------------------------------------------------------
+_apt_candidate_version() {
+    local pkg="$1"
+    apt-cache policy "$pkg" 2>/dev/null | awk '/Candidate:/{v=$2} END{print v}'
+}
+
+# ---------------------------------------------------------------------------
 # fix_apt_sources: unified APT source fixing
 # Order: fix EOL archives first, then apply APT_MIRROR.
 # If both are triggered, APT_MIRROR takes precedence but a warning is emitted.
@@ -185,7 +201,7 @@ if dpkg --compare-versions "$__debhelper_ver" lt '13.12~'; then
 
    # debhelper needs dwz >= 0.12.20190711, newer than some distros ship
    # (Ubuntu 18.04 has 0.12-2): pull it from the distro backports pocket.
-   __dwz_ver="$(apt-cache policy dwz 2>/dev/null | awk '/Candidate:/{print $2; exit}')"
+   __dwz_ver="$(_apt_candidate_version dwz)"
    [[ -z $__dwz_ver || $__dwz_ver == "(none)" ]] && __dwz_ver=0
    if dpkg --compare-versions "$__dwz_ver" lt '0.12.20190711'; then
        apt install -y -t "$(lsb_release -sc)-backports" dwz
@@ -214,7 +230,7 @@ if dpkg --compare-versions "$__debhelper_ver" lt '13.12~'; then
 
    # debhelper hardcodes versioned deps on init-system-helpers that old distros
    # predate (Ubuntu 18.04: 1.51); the subcommands used are all supported there.
-   __ish_ver="$(apt-cache policy init-system-helpers 2>/dev/null | awk '/Candidate:/{print $2; exit}')"
+   __ish_ver="$(_apt_candidate_version init-system-helpers)"
    [[ -z $__ish_ver || $__ish_ver == "(none)" ]] && __ish_ver=0
    if dpkg --compare-versions "$__ish_ver" lt '1.52'; then
        sed -i "s/\">= 1\.52\"/\">= $__ish_ver\"/; s/\">= 1\.66~\"/\">= $__ish_ver\"/" /usr/bin/dh_installsystemduser
