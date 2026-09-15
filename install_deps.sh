@@ -20,13 +20,15 @@ export DEBIAN_FRONTEND=noninteractive
 # ---------------------------------------------------------------------------
 # _apt_candidate_version: get a package's candidate version string, or ""
 #
-# Deliberately does NOT use `awk '{print; exit}'` / `head -n1` to short-
-# circuit the pipe. Under `set -o pipefail`, closing the read end early
-# causes the upstream command (apt-cache policy) to receive SIGPIPE on its
-# next write and exit 141; pipefail then reports 141 for the whole pipeline
-# even though the value was captured correctly, which trips `errexit` via
-# the ERR trap. Letting awk consume the full (small) stream avoids that
-# failure mode entirely rather than papering over it with `|| true`.
+# Deliberately does NOT use `awk '/Candidate:/{print $2; exit}'` / `head -n1`
+# to short-circuit the pipe. The Candidate line appears early in
+# `apt-cache policy` output with the Version table still to follow;
+# closing the read end early lets apt-cache hit SIGPIPE on its next
+# write and exit 141; under `set -o pipefail` that 141 becomes the
+# pipeline status even though the value was captured, tripping
+# `errexit` via the ERR trap. Letting awk consume the full (small)
+# stream avoids that race entirely rather than papering over it with
+# `|| true`.
 # ---------------------------------------------------------------------------
 _apt_candidate_version() {
     local pkg="$1"
