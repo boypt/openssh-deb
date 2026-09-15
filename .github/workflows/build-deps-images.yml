@@ -16,6 +16,9 @@ jobs:
   # amd64 和 arm64 都用各自架构的原生 runner 构建（和 create-release.yml 的策略保持一致），
   # 不使用 QEMU 模拟，避免影响构建速度。
   build:
+    # Allow skipping with "[skip ci]" in the head commit message on push.
+    # workflow_dispatch always runs (no head_commit in that event).
+    if: github.event_name == 'workflow_dispatch' || !contains(github.event.head_commit.message, '[skip ci]')
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read
