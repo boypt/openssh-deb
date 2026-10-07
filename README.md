@@ -50,12 +50,6 @@ If your OS is in the table above, the fastest way is to install the CI-built `.d
 sudo bash -c "$(curl -L https://github.com/boypt/openssh-deb/raw/master/lazy_install.sh)"
 ```
 
-Behind a firewall or need a GitHub proxy?
-
-```bash
-sudo bash -c "$(curl -L https://gh-proxy.com/github.com/boypt/openssh-deb/raw/master/lazy_install.sh)" @ gh-proxy.com
-```
-
 The script detects your codename and architecture, downloads the matching release tarball from the [latest GitHub Release](https://github.com/boypt/openssh-deb/releases/latest), and installs it with `apt`.
 
 > To revert to the distro-provided OpenSSH later, see [Rolling Back to the Distro Default](#rolling-back-to-the-distro-default).
