@@ -22,7 +22,7 @@ Prebuilt packages are tested and published via GitHub Actions. Other architectur
 | **Debian 12** | `bookworm` | `amd64` / `arm64` | ✅ Fully supported |
 | **Debian 11** | `bullseye` | `amd64` / `arm64` | ✅ Fully supported |
 | **Debian 10** | `buster` | `amd64` / `arm64` | ✅ Fully supported |
-| UnionTech OS Desktop 20 Home | *based on buster / glibc 2.28* | — | ⚠️ See [extra steps](#uniontech-os-desktop-20-home) |
+| UnionTech OS Server V20 | *based on buster / glibc 2.28* | — | ⚠️ See [extra steps](#uniontech-os-server-v20) |
 | Kylin V10 SP1 | *based on focal / glibc 2.31* | — | ⚠️ See [extra steps](#kylin-v10-sp1) |
 
 > **Need another architecture?** Any Debian/Ubuntu derivative with a compatible glibc can build from source — see [Build from Source](#build-from-source).
@@ -179,9 +179,9 @@ Then restart `fail2ban`. `sshguard` and other tools need analogous updates — c
 
 ### Distribution-Specific Quirks
 
-#### UnionTech OS Desktop 20 Home
+#### UnionTech OS Server V20
 
-*Debian glibc 2.28-21-1+deepin-1*
+*Debian 10 based, glibc 2.28*
 
 1. Exclude `libfido2-dev` from the build-dependency install — it is not available.
 2. Manually install from `bullseye`:

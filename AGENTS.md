@@ -75,5 +75,5 @@ When a new upstream version is built and released:
 ## Known distro-specific quirks
 
 - Kylin V10 SP1: must run `./compile.sh` from a desktop terminal (not SSH), `kysec_auth` dialog requires manual approval
-- UnionTech OS Desktop 20: exclude `libfido2-dev`, install `dwz` and `dh-runit` from bullseye
+- UnionTech OS Server V20: exclude `libfido2-dev`, install `dwz` and `dh-runit` from bullseye
 - `fail2ban`/`sshguard` need config changes for OpenSSH >= 9.8 (sshd → sshd-session)
