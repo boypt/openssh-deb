@@ -35,7 +35,7 @@ Versions are pinned in [`version.env`](version.env). When `OPENSSH_SIDPKG` is em
 
 | Component | Version | Source |
 | :--- | :--- | :--- |
-| **OpenSSH** | `10.5p1-1` | Debian Sid — auto-tracked |
+| **OpenSSH** | `10.6p1-1` | Debian Sid — auto-tracked |
 | **OpenSSL** | `3.5.9` | Static link on older distros, dynamic link on newer ones |
 
 The built package version is suffixed with the target codename (e.g. `10.5p1-1~noble`) so it is clearly distinguishable from the distro's official package and won't be silently overwritten.
